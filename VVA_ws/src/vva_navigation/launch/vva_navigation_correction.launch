@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Intermediate module between a goal client and move_base, in charge of implementing improvement actions when
+       a goal fails. For example, put an intermediate closer goal which is in the same path of the original goal
+       to unstuck the robot -->
+       
+  <arg name="simulation" default="false"/>
+  <arg name="rate"       default="10" />
+  
+  <!-- Start vva_navigation_correction -->
+  <node pkg="vva_navigation" type="vva_navigation_correction.py" name="vva_navigation_correction" output="screen" >
+    <!-- In -->
+    <remap from="vva_navigation_simple/goal"   to="/vva_navigation_simple/goal"/>
+    <remap from="move_base/GlobalPlanner/plan" to="/move_base/GlobalPlanner/plan"/>
+    <remap from="vva_odom_correction/status" to="/vva_odom_correction/status"/>
+    
+    <!-- Out -->
+    <remap from="vva_navigation_correction/status"  to="/vva_navigation_correction/status"/>
+    
+    <param name="rate"                   value="$(arg rate)"/>  <!-- Execution rate of the node (Hz) -->
+    <param name="closer_goal_path_poses" value="20"/>  <!-- Distance from the base to the new intermediate goal, measured in number of poses
+                                                            of the global path. Approx. distance = closer_goal_path_poses * 0.025m -->
+    <param name="clear_costmaps_service_name" value="/move_base/clear_costmaps"/>  <!-- Service to call to clear move_base costmaps -->
+    
+    <param if="$(arg simulation)"     name="using_hw_rplidar" value="false"/>
+    <param unless="$(arg simulation)" name="using_hw_rplidar" value="true"/>  <!-- Indicate if a hardware RP-Lidar is used to be able to
+                                                                                   call the stop/start lidar service -->
+                                                                                   
+    <param name="stop_lidar_service_name"     value="/stop_motor"/>  <!-- Service to call to stop the motor of RPLidar -->
+    <param name="start_lidar_service_name"    value="/start_motor"/>  <!-- Service to call to start the motor of RPLidar -->
+    <param name="rplidar_idle_time"          value="90"/>  <!-- Time before stopping the RPLidar's motor when in idle state -->
+    
+    <param if="$(arg simulation)"     name="use_odom_correction_status" value="false"/>
+    <param unless="$(arg simulation)" name="use_odom_correction_status" value="true"/>  <!-- If set to true, vva_navigation_correction will
+                                                                                             wait for vva_odom_correction node to finish the
+                                                                                             odometry restart procedures before sending the
+                                                                                             goal to move_base -->
+  </node>  
+
+</launch>
+
+

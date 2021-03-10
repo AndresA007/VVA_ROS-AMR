@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <arg name="arduino_port" default="/dev/ttyUSB1"/>
+  
+  <!-- NOTE: Start the Arduino board and "rosserial_arduino" before "vva_base_controller", to have access to the encoder readings -->
+  
+  <node pkg="rosserial_arduino" type="serial_node.py" name="rosserial_arduino_node" output="screen">
+    <param name="port" value="$(arg arduino_port)" /> <!-- Serial port where the Arduino is connected -->
+  </node>
+
+
+  <!-- Receive the cmd_vel topic and move the wheels using PID control -->
+
+  <node pkg="vva_base_controller" type="vva_base_controller.py" name="vva_base_controller" output="screen">
+    <param name="robot_wheel_separation_distance" value="0.38" />  <!-- Separation in meters between right and left wheels -->
+    <param name="robot_wheel_diameter" value="0.13" />   <!-- Diameter in meters of the robot wheels -->
+    
+    <param name="calibration_file_path"
+      value="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
+    />  <!-- Here are stored all the motor calibration parameters. Delete this file if recalibration is required. -->
+    
+    <!--param name="calibration_file_path"
+      value="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
+    /-->  <!-- This file is created by the calibration node, here are stored all the motor calibration parameters -->
+    
+    <param name="pid_on" value="True" />  <!-- Enable PID control -->
+    <param name="rotation_Kp" value="0.8" />    <!-- Proportional coefficient of PID controller. Used for rotation in place. -->
+    <param name="rotation_Ki" value="1.5" />    <!-- Integral coefficient of PID controller. Used for rotation in place. -->
+    <param name="rotation_Kd" value="0.01" />   <!-- Diferential coefficient of PID controller. Used for rotation in place. -->
+    <param name="translation_Kp" value="0.1" />    <!-- Proportional coefficient of PID controller. Used for other movements different from rotation in place. -->
+    <param name="translation_Ki" value="0.8" />    <!-- Integral coefficient of PID controller. Used for other movements different from rotation in place. -->
+    <param name="translation_Kd" value="0.01" />   <!-- Diferential coefficient of PID controller. Used for other movements different from rotation in place. -->
+
+    <param name="rate" value="10" />      <!-- Frequency at which the node main loop is executed -->
+    <param name="timeout_idle" value="50" />  <!-- cmd_vel messages will be ignored if they take longer than this time to be processed -->
+  </node>
+
+</launch>
+
+
+
+
+

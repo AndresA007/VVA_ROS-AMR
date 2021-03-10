@@ -1,0 +1,12 @@
+
+"crontab -l" para el usuario "ubuntu"
+--------------------------------------------------------------------------------------------
+
+# Notify when the assigned IP address changes
+*/3 * * * * /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/SMTPNotificationScript/sendMyIPByEmail.sh > /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/SMTPNotificationScript/sendMyIPByEmail.status
+
+# Notify the Under-voltage events
+10 1-23 * * * /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/SMTPNotificationScript/reportLowVoltageByEmail.sh > /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/SMTPNotificationScript/reportLowVoltageByEmail.status
+
+
+

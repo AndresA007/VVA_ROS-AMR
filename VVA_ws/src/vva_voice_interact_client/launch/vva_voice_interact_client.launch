@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<launch>
+  
+<!-- Waits for a wake word to be detected, once it is detected, records a short audio clip
+     in a .wav file and sends it to the speech recognition server -->
+
+
+  <arg name="system" default="linux"/>   <!-- Set the architecture where the node is running.
+                                                     Possible values: "linux", "raspberry-pi" -->
+
+  <node pkg="vva_voice_interact_client" type="vva_wake_word_detect.py" name="vva_wake_word_detect" output="screen">
+    
+    <!-- Comma-separated absolute paths to Porcupine's keyword files -->
+    <param name="keyword_file_paths" value="
+      resources/keyword_files/$(arg system)/americano_$(arg system).ppn,
+      resources/keyword_files/$(arg system)/blueberry_$(arg system).ppn,
+      resources/keyword_files/$(arg system)/bumblebee_$(arg system).ppn,
+      resources/keyword_files/$(arg system)/grapefruit_$(arg system).ppn,
+      resources/keyword_files/$(arg system)/grasshopper_$(arg system).ppn,
+      resources/keyword_files/$(arg system)/picovoice_$(arg system).ppn,
+      resources/keyword_files/$(arg system)/porcupine_$(arg system).ppn,
+      resources/keyword_files/$(arg system)/terminator_$(arg system).ppn
+      "/>                                                               
+    <param name="sensitivities"      value="0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5" />  <!-- Comma-separated detection sensitivities, each value between [0, 1] -->
+    
+    <param name="input_device_index" value="11" />  <!-- Index of input audio device, as listed by pyaudio:
+                                                        "python demo/python/porcupine_demo_mic.py \-\-show_audio_devices_info" -->
+    <param name="input_channels"     value="4" />  <!-- Number of audio channels of the input device. Used only for the .wav record file, not for wake word detection -->
+    <param name="sampling_rate"      value="16000" />  <!-- Sampling rate of the input device. Used only for the .wav record file, not for wake word detection -->
+    <param name="mic_type_id"        value="kinect" />  <!-- Indicates the microphone type. The Speech Recognition node will give special treatment to the submitted
+                                                             audio data depending on this value. Possible values: "kinect", "mobile_app" -->
+    <param name="record_seconds"     value="4.0" />  <!-- Duration of the audio that will be recorded after the wake word is detected -->
+    <param name="rate"               value="40" />  <!-- Frequency of execution of the main loop of the node -->
+    
+    <!--param name="record_file"        value="temp.wav" /-->  <!-- Path and name of the audio file recorded after the wake word is detected -->
+    
+    <param name="speech_recognition_service" value="/vva_recognize_speech" />  <!-- Service to be called to send the audio data to the Speech Recognition node -->
+    
+    <param name="enable_kinect_tilt" value="true" />  <!-- If true, makes the Kinect to change its tilt to +20 degrees after the wake word is detected -->
+    
+    <!-- Out -->
+    <remap from="kinect_led_option" to="/vva_kinect/led_option" />
+    <remap from="kinect_tilt"       to="/vva_kinect/tilt_angle" />
+    
+  </node>
+
+</launch>
+
+

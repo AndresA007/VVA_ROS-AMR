@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Starts the robot health check node. This node changes the Kinect's LED option or the tilt, based on the
+       status of the WiFi connectivity, to warn the user that the WiFi is disconnected. If the robot is navigating
+       and is processing a goal when the WiFi is reported as down, the Kinect's tilt is not changed.
+       This node requires the "WiFiWatchdog.sh" script to be running on the crontab. -->
+  
+  <node pkg="vva_robot_healthcheck" type="vva_robot_healthcheck_node.py" name="vva_robot_healthcheck_node" output="log">
+    
+    <param name="rate" value="10" />  <!-- Execution rate of the node (Hz) -->
+    
+    <!-- In -->
+    <remap from="vva_navigation_correction/status"  to="/vva_navigation_correction/status"/>
+    
+    <!-- Out -->
+    <remap from="vva_kinect/led_option"  to="/vva_kinect/led_option"/>
+    <remap from="vva_kinect/tilt_angle"  to="/vva_kinect/tilt_angle"/>
+  </node>
+  
+</launch>
+

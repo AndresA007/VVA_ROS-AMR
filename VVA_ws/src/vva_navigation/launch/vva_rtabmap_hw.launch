@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="database_path_hw"         default="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_navigation/maps/rtabmap.db"/>
+  <arg name="localization"      default="false"/>
+  
+  <arg     if="$(arg localization)" name="args"  default=""/>
+  <arg unless="$(arg localization)" name="args"  default="--delete_db_on_start"/>
+
+  <!-- Used only when RGBD is not used -->
+  <arg name="rgb_topic"   default="/camera/rgb/image_raw"/>
+  <arg name="depth_topic" default="/camera/depth_registered/sw_registered/image_rect_raw"/>
+  <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
+  
+  <arg name="wait_for_transform"  default="0.2"/> 
+
+    
+  <!-- 1. Mapping (rtabmap) -->
+    
+  <group ns="rtabmap_jnano">
+    <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="log" args="$(arg args)">
+      <param name="database_path" type="string" value="$(arg database_path_hw)"/>
+      
+      <param name="frame_id"            type="string" value="base_footprint"/>
+      <param name="wait_for_transform_duration"  type="double"   value="$(arg wait_for_transform)"/>
+      <param name="subscribe_scan"  type="bool" value="true"/>
+      <param name="map_always_update" type="bool" value="false"/>
+      
+      <param name="subscribe_depth" type="bool" value="true"/>
+      <param name="subscribe_rgbd"  type="bool" value="false"/>
+
+      <!-- When sending goals on /rtabmap/goal topic, use actionlib to communicate with move_base --> 
+      <param name="use_action_for_goal" type="bool" value="true"/>
+      <remap from="move_base"            to="/move_base"/>
+      
+  
+      <!-- inputs -->
+      <remap from="scan"            to="/rplidar_scan"/>
+      <remap from="initialpose"     to="/initialpose"/>
+      
+      <!-- Used only when RGBD is not used -->
+      <remap from="rgb/image"       to="$(arg rgb_topic)"/>
+      <remap from="depth/image"     to="$(arg depth_topic)"/>
+      <remap from="rgb/camera_info" to="$(arg camera_info_topic)"/>
+      
+      <remap from="odom" to="/scanmatch_odom"/>
+      <remap from="odom_info" to="/icp_odom_info"/>
+      
+      <param name="subscribe_odom_info" type="bool" value="true"/>
+
+      <!-- output -->
+      <remap from="grid_map" to="/map"/>
+  
+      <!-- RTAB-Map's parameters: do "rosrun rtabmap rtabmap (double-dash)params" to see the list of available parameters. -->
+      <param name="Grid/RayTracing"              type="string" value="true"/>  <!-- (New VVA v0.6) Ray tracing is done for each occupied cell, filling unknown space between the sensor and occupied cells. If Grid/3D=true, RTAB-Map should be built with OctoMap support, otherwise 3D ray tracing is ignored -->
+      <param name="Grid/Scan2dUnknownSpaceFilled"    type="string" value="false"/>  <!-- Keep it as false, otherwise the walls are not registered as obstacles in the grid map -->
+      <param name="RGBD/NeighborLinkRefining"    type="string" value="true"/>   <!-- (New VVA v0.6) Do odometry correction with consecutive laser scans -->
+      <param name="RGBD/ProximityBySpace"        type="string" value="true"/>   <!-- Find local loop closures based on the robot position in the map. It is useful when the robot, for example, is coming back in the opposite direction. With camera facing back, global loop closures
+                                                                                     cannot be found. So using the position and previously added laser scans to the map, we find the transform using ICP. -->
+      <param name="RGBD/OptimizeFromGraphEnd"    type="string" value="false"/>  <!-- Set to false to generate map correction between /map and /odom -->
+      <param name="Kp/MaxDepth"                  type="string" value="4.0"/>
+      <param name="Reg/Strategy"                 type="string" value="1"/>     <!-- Loop closure transformation: 0=Visual, 1=ICP, 2=Visual+ICP -->
+      <param name="Icp/CorrespondenceRatio"      type="string" value="0.3"/>    <!-- Ratio of matching correspondences to accept the transform -->
+      <param name="Vis/MinInliers"               type="string" value="15"/>    <!-- 3D visual words minimum inliers to accept loop closure -->
+      <param name="Vis/InlierDistance"           type="string" value="0.1"/>    <!-- 3D visual words correspondence distance -->
+      <param name="RGBD/AngularUpdate"           type="string" value="0.1"/>    <!-- Update map only if the robot is moving -->
+      <param name="RGBD/LinearUpdate"            type="string" value="0.1"/>    <!-- Update map only if the robot is moving -->
+      <param name="RGBD/ProximityPathMaxNeighbors" type="string" value="0"/>   <!-- Maximum neighbor nodes compared on each path. Set to 0 to disable merging the laser scans -->
+      <param name="Rtabmap/TimeThr"              type="string" value="0"/>    <!-- Maximum time allowed for map update (ms) (0 means infinity). When map update time exceeds this fixed time threshold, some nodes in Working Memory (WM) are transferred to Long-Term Memory to limit the size of the WM and decrease the update time -->
+      <param name="Mem/RehearsalSimilarity"      type="string" value="0.30"/>
+      <param name="Reg/Force3DoF"                type="string" value="true"/>
+      <param name="GridGlobal/MinSize"           type="string" value="20"/>
+      <param name="Grid/FromDepth"               type="string" value="false"/>
+      <param name="Grid/RangeMax"                type="string" value="0"/>   <!-- Keep it as 0, otherwise the walls are not registered as obstacles in the grid map -->
+      <param name="Rtabmap/StartNewMapOnLoopClosure" type="string" value="false"/>
+      <param if="$(arg localization)"     name="RGBD/CreateOccupancyGrid" type="string" value="false"/>
+      <param unless="$(arg localization)" name="RGBD/CreateOccupancyGrid" type="string" value="true"/>
+
+    
+      <!-- localization mode -->
+      <param     if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
+      <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+      <param name="Mem/InitWMWithAllNodes" type="string" value="$(arg localization)"/> 
+    </node>
+  </group>
+
+</launch>
+
+

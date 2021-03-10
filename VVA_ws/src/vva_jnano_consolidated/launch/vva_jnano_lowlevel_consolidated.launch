@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<launch>
+
+
+  <!-- 1. Start the Base Controller -->
+  
+  <arg name="arduino_port" default="/dev/ttyUSB1"/>
+  <arg name="rplidar_port" default="/dev/ttyUSB0"/>
+  <arg name="wheels_pid_on" default="True"/>
+  
+  
+  
+  <!-- Start rosserial for arduino -->
+  <node pkg="rosserial_arduino" type="serial_node.py" name="rosserial_arduino_node" output="log">
+    <param name="port" value="$(arg arduino_port)" />
+  </node>
+
+  <!-- Receive the cmd_vel topic and move the wheels using PID control -->
+  <node pkg="vva_base_controller" type="vva_base_controller.py" name="vva_base_controller" output="log">
+    <param name="robot_wheel_separation_distance" value="0.38" />
+    <param name="robot_wheel_diameter" value="0.13" />
+    
+    <param name="calibration_file_path"
+      value="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
+    />
+    
+    <param name="pid_on" value="$(arg wheels_pid_on)" />
+    <param name="rotation_Kp" value="0.8" />
+    <param name="rotation_Ki" value="1.5" />
+    <param name="rotation_Kd" value="0.01" />
+    <param name="translation_Kp" value="0.1" />
+    <param name="translation_Ki" value="0.8" />
+    <param name="translation_Kd" value="0.01" />
+
+    <param name="rate" value="10" />
+    <param name="timeout_idle" value="50" />
+  </node>
+  
+  
+  <!-- 2. Start OpenNI Kinect -->
+  
+  <param name="/camera/driver/data_skip" value="5" />
+
+  <include file="$(find openni_launch)/launch/openni.launch" >
+    <arg name="depth_registration" value="false"/>
+  </include>
+
+
+  <!-- 3. Start Kinect Aux -->
+  
+  <node pkg="vva_kinect_aux" type="vva_kinect_aux_node" name="vva_kinect_aux" output="log">
+    <param name="device_index" value="0" />
+    <param name="rate" value="10" />
+  </node>
+  
+  
+  <!-- 4. Start the RPLIDAR -->
+  
+  <node name="rplidarNode" pkg="vva_rplidar_ros" type="rplidarNode" output="log">
+    <param name="serial_port"         type="string" value="$(arg rplidar_port)"/>
+    <param name="serial_baudrate"     type="int"    value="115200"/>
+    <param name="frame_id"            type="string" value="rplidar_frame"/>
+    <param name="inverted"            type="bool"   value="false"/>
+    <param name="angle_compensate"    type="bool"   value="true"/>
+    <param name="scan_mode"           type="string" value="Boost"/>  <!-- Standard, Express, Stability, Boost -->
+    <param name="constant_intensity"  type="bool"   value="false"/>
+    <param name="constant_intensity_value" type="int" value="15"/>
+
+    <remap from="scan"                to="/rplidar_scan"/>
+  </node>
+
+
+  <!-- 5. Start the State Publishers -->
+  
+  <arg name="model_hw"         default="$(find vva_description)/urdf/vaa.xacro"/>
+  
+  <!-- Robot joints state topics received from other nodes -->
+  <arg name="joint_state_source_list" default="[
+    vva_kinect/tilt_joint_state
+  ]"/>
+  
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model_hw)" />
+
+  <!-- Publish the state of the model joints -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="log" >
+    <rosparam param="source_list" subst_value="True">$(arg joint_state_source_list)</rosparam>
+    <param name="rate" type="int" value="10" />
+  </node>
+  
+  <!-- Publish the TF of the model links -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="log" >
+    <param name="publish_frequency" type="double" value="10" />
+  </node>
+  
+</launch>
+

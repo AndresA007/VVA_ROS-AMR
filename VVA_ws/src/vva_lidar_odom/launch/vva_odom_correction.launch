@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Make periodic restarts of the odometry when the vehicle is stopped, to have the "odom" frame closer to
+       the base and hence reduce the drift and the error when the vehicle rotates -->
+  
+  <arg name="rate" default="10" />
+  
+  <!-- Start vva_odom_correction -->
+  <node pkg="vva_lidar_odom" type="vva_odom_correction.py" name="vva_odom_correction" output="screen" >
+    <!-- In -->
+    <remap from="vva_angular_vel_left_wheel_enc"  to="/vva_angular_vel_left_wheel_enc"/>
+    <remap from="vva_angular_vel_right_wheel_enc" to="/vva_angular_vel_right_wheel_enc"/>
+    <remap from="move_base/status"               to="/move_base/status"/>
+    
+    <!-- Out -->
+    <remap from="initialpose"                     to="/initialpose"/>
+    <remap from="vva_odom_correction/status"      to="/vva_odom_correction/status"/>
+    
+    <param name="rate"                            value="$(arg rate)"/>  <!-- Execution rate of the node (Hz) -->
+    <param name="reset_odom_service_name"         value="/reset_odom"/>  <!-- Service to call to reset odometry -->
+
+    <param name="reset_odom_period_idle"          value="60"/>  <!-- Time between periodic odometry-resets when the vehicle is stopped (Seconds) -->
+    <param name="reset_odom_period_moving"        value="3"/>   <!-- Time waited to reset the odometry just after the vehicle stops (Seconds) -->
+    <param name="busy_time_before_odom_reset"     value="2"/>   <!-- Time before reset_odom_period_idle expires to start publishing busy status (Seconds) -->
+    <param name="map_frame"                       value="map"/>
+    <param name="base_frame"                      value="base_footprint"/>
+    
+  </node>  
+
+</launch>
+
+

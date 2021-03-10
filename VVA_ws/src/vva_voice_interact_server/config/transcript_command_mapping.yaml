@@ -1,0 +1,19 @@
+# Map between transcripts and ROS services
+# Use '*' to indicate the part of the transcript that will be passed to the plugin as an argument of the service
+transcripts_mapping:
+  - {key: "go to *",                    service: "/vva_navigation_intent/navigate_to"}
+  - {key: "come to *",                  service: "/vva_navigation_intent/navigate_to"}
+  
+  - {key: "start patrolling",           service: "/vva_navigation_intent/start_patrolling"}
+  - {key: "start itinerary",            service: "/vva_navigation_intent/start_patrolling"}
+  - {key: "go round",                   service: "/vva_navigation_intent/start_patrolling"}
+  - {key: "give a round",               service: "/vva_navigation_intent/start_patrolling"}
+  - {key: "to patrol",               service: "/vva_navigation_intent/start_patrolling"}
+  
+  - {key: "stop",                       service: "/vva_navigation_intent/stop_navigation"}
+  - {key: "don't move",                 service: "/vva_navigation_intent/stop_navigation"}
+
+  #~ - {key: "start listening",            service: "/vva_audio_listen_intent/listen"}
+  #~ - {key: "start continuous listening", service: "/vva_audio_listen_intent/listen_continuously"}
+
+

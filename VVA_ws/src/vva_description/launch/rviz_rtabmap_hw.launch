@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="rvizconfig"       default="$(find vva_description)/rviz/rtabmap_navigation.rviz" />
+  
+  <!-- Start rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" output="screen" >
+    <!-- Out -->
+    <remap from="/move_base_simple/goal"  to="/vva_navigation_simple/goal" />
+  </node>
+
+</launch>
+

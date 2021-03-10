@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <group ns="vva_lidar_filter">
+    
+    <!-- Start the filter for laserscan_kinect LaserScan -->
+
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laserscan_kinect_filter" output="screen" >
+      <rosparam command="load" file="$(find vva_lidar_filter)/config/laserscan_filter_params.yaml" />
+      <!-- In -->
+      <remap from="scan" to="/kinect_scan" />
+      <!-- Out -->
+      <remap from="scan_filtered" to="kinect_scan" />
+    </node>
+
+  </group>
+
+</launch>
+
+

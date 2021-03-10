@@ -1,0 +1,6 @@
+string   client_id
+uint8[]  audio_data
+---
+string   status
+string   text
+

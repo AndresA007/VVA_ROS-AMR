@@ -1,0 +1,45 @@
+TrajectoryPlannerROS:
+# (https://wiki.ros.org/base_local_planner#Parameters)
+  max_vel_x: 0.3
+  min_vel_x: 0.15
+  max_vel_theta: 0.001
+  min_vel_theta: -0.001
+  min_in_place_vel_theta: 0.8
+  escape_vel: -0.05
+
+  acc_lim_theta: 0.27
+  acc_lim_x: 0.31
+  acc_lim_y: 0.0
+  
+  holonomic_robot: false
+  
+
+  # Goal Tolerance Parameters
+  yaw_goal_tolerance: 6.2  # 0.05
+  xy_goal_tolerance: 0.3  # 0.10
+
+  # Forward Simulation Parameters
+  sim_time: 3.0          # 1.0   It must fulfill: (sim_time * min_vel_x)  <  (2 * xy_goal_tolerance)
+  vx_samples: 20         # 3
+  vtheta_samples: 60     # 20
+  
+  sim_granularity: 0.025  # 0.025
+
+  # Trajectory Scoring Parameters
+  path_distance_bias:  0.6    # 0.6 - The weighting for how much the controller should stay close to the path it was given, maximal possible value is 5.0
+  goal_distance_bias:  0.8    # 0.8 - The weighting for how much the controller should attempt to reach its local goal, also controls speed, maximal possible value is 5.0
+  occdist_scale: 0.01  # 0.01   - weighting for how much the controller should avoid obstacles
+  heading_lookahead: 0.325 # 0.325  - How far to look ahead in meters when scoring different in-place-rotation trajectories
+  dwa: false
+  meter_scoring: true  # To make the settings robust against changes of costmap resolution
+  
+
+  # Oscillation Prevention Parameters
+  oscillation_reset_dist: 0.05  # 0.05   - how far to travel before resetting oscillation flags
+
+  # Debugging
+  publish_cost_grid_pc: true
+  global_frame_id: odom
+
+
+

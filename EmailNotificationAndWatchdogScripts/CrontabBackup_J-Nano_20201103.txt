@@ -1,0 +1,13 @@
+
+"crontab -l" para el usuario "ubuntu"
+--------------------------------------------------------------------------------------------
+
+# m h  dom mon dow   command
+
+# Notify when the assigned IP address changes
+* * * * * /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/EmailNotificationAndWatchdogScripts/sendMyIPByEmail.sh > /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/EmailNotificationAndWatchdogScripts/sendMyIPByEmail.status
+# WiFi connectivity watchdog
+* * * * * /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/EmailNotificationAndWatchdogScripts/WiFiWatchdog.sh >> /home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/EmailNotificationAndWatchdogScripts/WiFiWatchdog.status
+
+
+

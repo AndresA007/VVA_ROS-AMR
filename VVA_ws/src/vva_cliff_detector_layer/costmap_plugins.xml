@@ -1,0 +1,6 @@
+<library path="lib/libvva_costmap_layers">
+  <class type="vva_cliff_detector_layer::VVACliffDetectorLayer" base_class_type="costmap_2d::Layer">
+    <description>Uses points information to change the costmap</description>
+  </class>
+</library>
+

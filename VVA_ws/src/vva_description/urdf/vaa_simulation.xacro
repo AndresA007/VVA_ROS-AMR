@@ -1,0 +1,226 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="vaa">
+
+  <xacro:include filename="$(find vva_description)/urdf/vaa.gazebo" />
+  
+  <xacro:property name="base_link_depth_m" value="0.45" />
+  <xacro:property name="base_link_width_m" value="0.45" />
+  <xacro:property name="base_link_height_m" value="0.27" />
+  <xacro:property name="base_link_elevation_m" value="0.035" />
+  <xacro:property name="base_link_mass_kg" value="5.0" />
+  
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+  <material name="yellow">
+    <color rgba="1 1 0 1"/>
+  </material>
+
+
+  <link name="base_footprint" />
+
+  <link name="base_stabilized" />
+  <joint name="base_stabilized_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 ${base_link_elevation_m}"/>
+    <parent link="base_footprint"/>
+    <child link="base_stabilized"/>
+  </joint>
+
+
+  <link name="base_balancing_x" />
+  <!-- This joint is referenced from "vva_kinect_aux", do not change the name -->
+<!--
+  <joint name="base_balancing_x_joint" type="revolute">
+-->
+  <joint name="base_balancing_x_joint" type="fixed">
+    <axis xyz="1 0 0"/>
+    <limit effort="1.0" lower="${-pi/2}" upper="${pi/2}" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_stabilized"/>
+    <child link="base_balancing_x"/>
+	</joint>
+  
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://vva_description/meshes/20201002_VAA_BaseLink_v3.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="-0.235 -0.38 ${base_link_height_m/2 - 0.05}"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${base_link_depth_m} ${base_link_width_m} ${base_link_height_m - 0.12}"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 ${(base_link_height_m - 0.12) / 2}"/>
+    </collision>
+    <inertial>
+      <mass value="${base_link_mass_kg}"/>
+      <inertia ixx="${(1/12)*base_link_mass_kg*((base_link_height_m**2)+(base_link_depth_m**2))}" ixy="0.0" ixz="0.0"
+               iyy="${(1/12)*base_link_mass_kg*((base_link_width_m**2)+(base_link_depth_m**2))}" iyz="0.0"
+               izz="${(1/12)*base_link_mass_kg*((base_link_width_m**2)+(base_link_height_m**2))}"/>
+    </inertial>
+  </link>
+  <!-- This joint is referenced from "vva_kinect_aux", do not change the name -->
+<!--
+  <joint name="base_link_y_axis_joint" type="revolute">
+-->
+  <joint name="base_link_y_axis_joint" type="fixed">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.0" lower="${-pi/2}" upper="${pi/2}" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_balancing_x"/>
+    <child link="base_link"/>
+	</joint>
+
+  <xacro:property name="wheel_width" value="0.07" />
+  <xacro:property name="wheel_diameter" value="0.13" />
+  <xacro:property name="wheel_mass_kg" value="0.138" />
+
+  <xacro:macro name="right_wheel" params="prefix joint_x joint_y">
+    <link name="${prefix}_wheel">
+      <visual>
+        <geometry>
+          <mesh filename="package://vva_description/meshes/20200914_VAA_Wheel2.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <origin rpy="0 0 0" xyz="-0.138 -0.19 0.052"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_diameter/2}"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.4</mu>
+              <mu2>0.4</mu2>
+              <slip1>0.3</slip1>
+              <slip2>0.3</slip2>
+            </ode>
+          </friction>
+        </surface>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="${wheel_mass_kg}"/>
+        <inertia ixx="${wheel_mass_kg/10}" ixy="0.0" ixz="0.0"
+                 iyy="${wheel_mass_kg/10}" iyz="0.0"
+                 izz="${wheel_mass_kg/10}"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <axis xyz="0 1 0"/>
+      <origin rpy="0 0 0" xyz="${joint_x} ${joint_y} ${(wheel_diameter/2)-base_link_elevation_m+0.003}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:right_wheel prefix="right_front" joint_x="${(base_link_depth_m/2)-0.13}" joint_y="${-(base_link_width_m/2) + 0.035}" />
+  <xacro:right_wheel prefix="right_back" joint_x="${-(base_link_depth_m/2)+0.13}" joint_y="${-(base_link_width_m/2) + 0.035}" />
+  
+  <xacro:macro name="left_wheel" params="prefix joint_x joint_y">
+    <link name="${prefix}_wheel">
+      <visual>
+        <geometry>
+          <mesh filename="package://vva_description/meshes/20200914_VAA_Wheel2.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <origin rpy="${pi} 0 0" xyz="-0.138 0.19 -0.052"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_diameter/2}"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.4</mu>
+              <mu2>0.4</mu2>
+              <slip1>0.3</slip1>
+              <slip2>0.3</slip2>
+            </ode>
+          </friction>
+        </surface>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="${wheel_mass_kg}"/>
+        <inertia ixx="${wheel_mass_kg/10}" ixy="0.0" ixz="0.0"
+                 iyy="${wheel_mass_kg/10}" iyz="0.0"
+                 izz="${wheel_mass_kg/10}"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <axis xyz="0 1 0"/>
+      <origin rpy="0 0 0" xyz="${joint_x} ${joint_y} ${(wheel_diameter/2)-base_link_elevation_m+0.003}"/>
+    </joint>
+  </xacro:macro>
+  
+  <xacro:left_wheel prefix="left_back" joint_x="${-(base_link_depth_m/2)+0.13}" joint_y="${(base_link_width_m/2) - 0.035}" />
+  <xacro:left_wheel prefix="left_front" joint_x="${(base_link_depth_m/2)-0.13}" joint_y="${(base_link_width_m/2) - 0.035}" />
+
+  
+  <link name="kinect_frame"/>
+  <!-- This joint is referenced from "vva_kinect_aux", do not change the name -->
+<!--
+  <joint name="kinect_joint" type="revolute">
+-->
+  <joint name="kinect_joint" type="fixed">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.0" lower="-0.54" upper="0.54" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0.1 0 0.167"/>
+    <parent link="base_link"/>
+    <child link="kinect_frame"/>
+  </joint>
+
+  <!-- This link (frame) is used by the hardware OpenNI Kinect -->
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://vva_description/meshes/kinect.dae"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.07 0.29 0.065"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="-0.03 0 -0.015"/>
+    </collision>
+  </link>  
+  <joint name="camera_joint" type="fixed">
+	  <origin xyz="0.03 0 0.03" rpy="0 0 0" />
+	  <parent link="kinect_frame" />
+	  <child link="camera_link" />
+	</joint>
+
+  <!-- This link (frame) is used by the Gazebo simulated Kinect -->
+  <link name="kinect_gazebo_frame"/>
+
+  <joint name="kinect_gazebo_joint" type="fixed">
+	  <origin xyz="0.03 0 0.03" rpy="${-pi/2} 0 ${-pi/2}" />
+	  <parent link="kinect_frame" />
+	  <child link="kinect_gazebo_frame" />
+	</joint>
+  
+  
+  <link name="rplidar_frame">
+    <collision>
+      <geometry>
+        <box size="0.10 0.10 0.06"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.015 0 -0.015"/>
+    </collision>
+  </link>
+  <joint name="rplidar_frame_base_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.015 0 0.23"/>
+    <parent link="base_link"/>
+    <child link="rplidar_frame"/>
+  </joint>
+  
+</robot>
+

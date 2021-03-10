@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+
+
+<!-- Receives a wav file through a ROS service and calls the non-ROS DeepSpeech
+     module through a TCP socket to perform Speech Recognition -->
+
+  <node pkg="vva_voice_interact_server" type="vva_speech_recognition_node.py" name="vva_speech_recognition_node" output="log">
+    
+    <rosparam command="load" file="$(find vva_voice_interact_server)/config/transcript_command_mapping.yaml"/>
+    
+    <param name="deepspeech_socket_port" value="39567" />  <!-- Port in the localhost where DeepSpeech module receives the notification
+                                                                to start Speech Recognition over the received audio file -->
+    
+    <param name="wav_save_path"
+      value="/home/theuser/AAData/Documents2/ROS/Tutoriales/DeepSpeechWorkDir/DataSets/VVA_Kinect_wav_saves/"
+    />  <!-- Path where the wav files received from the Kinect will be saved for future use as training data-sets -->
+    
+    <param name="rate" value="10" />      <!-- Frequency at which the node main loop is executed -->
+    
+    <!-- Out -->
+    <remap from="vva_kinect/led_option"            to="/vva_kinect/led_option"/>
+    
+  </node>
+
+</launch>
+
+

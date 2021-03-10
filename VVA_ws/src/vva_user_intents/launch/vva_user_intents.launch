@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+
+<!-- Starts all the nodes in charge of executing the user intents reveived by voice commands from the Speech Recognition node -->
+
+  <arg name="simulation" default="false"/>
+
+  <!-- Start the node in charge of executing the user intents related to navigation -->
+  <node pkg="vva_user_intents" type="vva_navigation_intent.py" name="vva_navigation_intent" output="log">
+    
+    <rosparam if="$(arg simulation)"     command="load" file="$(find vva_user_intents)/config/navigation_intent_params_simulation.yaml"/>
+    <rosparam unless="$(arg simulation)" command="load" file="$(find vva_user_intents)/config/navigation_intent_params.yaml"/>
+    
+    <param name="rate" value="10" />      <!-- Frequency at which the node main loop is executed -->
+    
+    <param name="stop_navigation_service_name" value="/vva_navigation_correction/cancel_goal"/>  <!-- Service to call to stop navigation (cancel goal) -->
+
+    <param name="map_frame" value="map"/>
+    
+  </node>
+  
+
+</launch>
+
+
+
+

@@ -1,0 +1,37 @@
+global_costmap:
+  #~ global_frame: odom
+  global_frame: map
+  
+  robot_base_frame: base_footprint
+  update_frequency: 0.1
+  publish_frequency: 0.1
+  
+  #~ rolling_window: true
+  #~ width: 10.0
+  #~ height: 10.0
+  
+  resolution: 0.05
+  transform_tolerance: 1.0
+  
+  footprint:    [ [0.23, 0.21], [-0.23, 0.21], [-0.23, -0.21], [0.23, -0.21] ]
+
+  plugins:
+     - {name: static_layer,                   type: "costmap_2d::StaticLayer"}
+     #~ - {name: obstacle_layer,                 type: "costmap_2d::ObstacleLayer"}
+     #~ - {name: obstacle_voxel_layer,                 type: "costmap_2d::VoxelLayer"}
+     #~ - {name: spatio_temporal_obstacle_layer, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+     #~ - {name: cliff_detector_obstacle_layer,  type: "vva_cliff_detector_layer::VVACliffDetectorLayer"}
+     - {name: global_inflation_layer,         type: "costmap_2d::InflationLayer"}
+
+  ###################################
+  # Global costmap layers:
+  ###################################
+  
+  global_inflation_layer:
+  ##############
+    # (https://wiki.ros.org/costmap_2d/hydro/inflation)
+    enabled:              true
+    cost_scaling_factor:   3.0  # exponential rate at which the obstacle cost drops off (default: 10)
+    inflation_radius:      1.5  # max. distance from an obstacle at which costs are incurred for planning paths.
+
+

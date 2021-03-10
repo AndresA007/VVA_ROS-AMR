@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="model_simulation" default="$(find vva_description)/urdf/vaa_simulation.xacro"/>
+  <arg name="rvizconfig"       default="$(find vva_description)/rviz/rtabmap_navigation.rviz" />
+  <arg name="rate"             default="10" />
+
+
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model_simulation)" />
+
+  <!-- Publish the state of the model joints -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen" >
+    <param name="rate" type="int" value="$(arg rate)" />
+  </node>
+  
+  <!-- Publish the TF of the model links -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" >
+    <param name="publish_frequency" type="double" value="$(arg rate)" />
+  </node>
+  
+  <!-- Start rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" output="screen" >
+    <!-- Out -->
+    <remap from="/move_base_simple/goal"  to="/vva_navigation_simple/goal" />
+  </node>
+
+</launch>
+

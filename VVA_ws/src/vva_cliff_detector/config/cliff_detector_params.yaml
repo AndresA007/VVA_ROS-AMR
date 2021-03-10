@@ -1,0 +1,22 @@
+output_frame_id: camera_link # Frame id for the output laserscan.
+rate: 10                     # Data processing frequency  (Hz).
+range_min: 0.4               # Minimum sensor range (in meters).
+range_max: 5.0               # Maximum sensor range (in meters).
+sensor_mount_height: 0.2     # Height of kinect mount (m).
+sensor_tilt_angle: 0         # Sensor tilt angle (degrees).
+
+publish_depth: false          # Determines if depth should be republished.
+cam_model_update: true       # If continously camera data update.
+used_depth_height: 400       # Used depth height from img bottom (px).
+block_size: 32               # Square block (subimage) size (px).
+depth_img_step_row: 8        # Rows step in depth processing (px).
+depth_img_step_col: 8        # Columns step in depth processing (px).
+
+# Block stairs points threshold (px).
+# It must fulfill: block_points_thresh < (block_size/depth_img_step_row)*(block_size/depth_img_step_col)
+# In other words, you can ignore only a number of stairs-points per block less than the number of samples taken per block.
+block_points_thresh: 15       
+
+ground_margin: 0.8           # Ground margin in meters.
+
+

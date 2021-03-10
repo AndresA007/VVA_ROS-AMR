@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="publish_static_tf" default="false" />   <!-- Publish a static TF only for isolated tests of RPLidar -->
+  <arg name="rplidar_port" default="/dev/ttyUSB0" />
+
+  <!-- Publish a static TF for the RPLidar frame -->
+  <node if="$(arg publish_static_tf)" pkg="tf2_ros" type="static_transform_publisher" name="rplidar_frame_to_map"
+    args="0 0 0 0 0 0 /rplidar_frame /map" />  
+
+  <!-- Start the RPLidar -->
+  <node name="rplidarNode" pkg="vva_rplidar_ros" type="rplidarNode" output="screen">
+    <param name="serial_port"         type="string" value="$(arg rplidar_port)"/>
+    <param name="serial_baudrate"     type="int"    value="115200"/>
+    <param name="frame_id"            type="string" value="rplidar_frame"/>
+    <param name="inverted"            type="bool"   value="false"/>
+    <param name="angle_compensate"    type="bool"   value="true"/>
+    <param name="scan_mode"           type="string" value="Boost"/>  <!-- Possible values:
+                                                                            Standard,  max_distance: 12.0 m, Point number: 2.0K , angle_compensate: 1
+                                                                            Express,   max_distance: 12.0 m, Point number: 4.0K , angle_compensate: 1
+                                                                            Stability, max_distance: 12.0 m, Point number: 4.0K , angle_compensate: 1
+                                                                            Boost,     max_distance: 12.0 m, Point number: 8.0K , angle_compensate: 2 -->
+    <param name="constant_intensity"  type="bool"   value="false"/>  <!-- If true, the "intensities" array will have the same "constant_intensity_value" in all its positions. If false, the real lidar intensity will be used -->
+    <param name="constant_intensity_value" type="int" value="15"/>  <!-- Used only if "constant_intensity" is true -->
+
+    <!-- Out -->
+    <remap from="scan"                to="/rplidar_scan"/>
+  </node>
+
+</launch>
+

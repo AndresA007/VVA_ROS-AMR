@@ -1,0 +1,45 @@
+scan_filter_chain:
+# (http://wiki.ros.org/laser_filters)
+
+
+- name: remove_inside_this_angle
+  type: laser_filters/LaserScanAngularBoundsFilterInPlace
+  params:
+    # 0 in front, negative to the right, positive to the left
+    lower_angle: 0.35
+    upper_angle: 0.65   # approx. 31 degrees
+
+
+
+# Uses the median of every "number_of_observations".
+# It generates a delay in the update of the readings from the fake Lidar that
+# causes too much drift when rotating in place. This drift is recognized as though
+# they were obstacles.
+#~ - name: laser_median_filter_1
+  #~ type: laser_filters/LaserArrayFilter
+  #~ params:
+    #~ range_filter_chain:
+      #~ - name: median
+        #~ type: filters/MultiChannelMedianFilterFloat
+        #~ params:
+          #~ number_of_observations: 3
+    #~ intensity_filter_chain:
+      #~ - name: median
+        #~ type: filters/MultiChannelMedianFilterFloat
+        #~ params:
+          #~ number_of_observations: 3
+
+
+
+# It is not useful, it removes "neighbors" quantity of points from the right of the
+# point where a jump in distance (depth) is detected, but it doesn't remove the points
+# from the left, so the noise points remain.
+#~ - name: shadows_1
+  #~ type: laser_filters/ScanShadowsFilter
+  #~ params:
+    #~ min_angle: 0.5
+    #~ max_angle: 179.5
+    #~ neighbors: 20
+    #~ window: 1
+
+

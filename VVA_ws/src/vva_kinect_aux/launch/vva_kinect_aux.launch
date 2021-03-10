@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="vva_kinect_aux" type="vva_kinect_aux_node" name="vva_kinect_aux" output="screen">
+    <param name="device_index" value="0" />  <!-- If multiple Kinect devices are connected to the computer, indicate which is controlled by this node -->
+    <param name="rate" value="10" />    <!-- Frequency of execution of the main loop of the node -->
+    
+    <!-- In -->
+    <remap from="vva_kinect/led_option" to="vva_kinect/led_option" />  <!-- 0:Off, 1:Green hold, 2:Red, 3:Orange, 4/5:Green blink, 6/7:Red/Orange blink -->
+  </node>
+  
+</launch>
+

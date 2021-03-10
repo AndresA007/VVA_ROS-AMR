@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!-- 
+    ROS navigation stack
+-->
+<launch>
+  <arg name="simulation"      default="false"/>
+
+  <arg name="odom_frame_id"   default="odom"/>
+  <arg name="base_frame_id"   default="base_footprint"/>
+  <arg name="global_frame_id" default="map"/>
+    
+  <arg if="$(arg simulation)"     name="odom_topic" default="odom" />
+  <arg unless="$(arg simulation)" name="odom_topic" default="/scanmatch_odom" />
+    
+  <arg name="laser_topic" default="/rplidar_scan" />
+
+
+  <!-- 1. Start move_base -->
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find vva_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find vva_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find vva_navigation)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vva_navigation)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vva_navigation)/config/base_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find vva_navigation)/config/move_base_params.yaml" command="load" />
+    <rosparam file="$(find vva_navigation)/config/global_planner_params.yaml" command="load" />
+    
+    <remap from="cmd_vel" to="cmd_vel"/>
+    <remap from="odom" to="$(arg odom_topic)"/>
+    <remap from="scan" to="$(arg laser_topic)"/>
+  </node>
+
+
+  <!-- 2. Synchronize depth images and camera info at reception for vva_cliff_detector and laserscan_kinect -->
+  
+	<node name="vva_image_camera_info_sync" pkg="vva_topics_sync" type="vva_image_camera_info_sync.py" output="screen">
+      <param if="$(arg simulation)"     name="input_image_topic"        type="string" value="/camera/depth/image_raw"/>
+      <param if="$(arg simulation)"     name="input_camera_info_topic"  type="string" value="/camera/depth/camera_info"/>
+      <param unless="$(arg simulation)" name="input_image_topic"        type="string" value="/camera/depth_registered/image_raw"/>
+      <param unless="$(arg simulation)" name="input_camera_info_topic"  type="string" value="/camera/depth_registered/camera_info"/>
+      
+      <param name="output_image_topic"       type="string" value="/synchronized/image"/>
+      <param name="output_camera_info_topic" type="string" value="/synchronized/camera_info"/>
+	</node>
+
+
+  <!-- 3. Start vva_cliff_detector, to mark holes and cliffs -->
+
+  <node unless="$(arg simulation)" name="vva_cliff_detector" pkg="vva_cliff_detector" type="vva_cliff_detector" output="screen">
+      <!-- In -->
+	  	<remap from="image" to="/synchronized/image"/>
+	  	<remap from="camera_info" to="/synchronized/camera_info"/>
+      <!-- Out -->
+      <remap from="cliff_detector/depth" to="/downstairs_detector/depth/image"/>
+      <remap from="cliff_detector/points" to="/downstairs_detector/points"/>
+      
+      <rosparam command="load" file="$(find vva_cliff_detector)/config/cliff_detector_params.yaml"/>
+	</node>
+
+
+  <!-- 4. Start laserscan_kinect, converts depth image to laser scan to detect small obstacles -->
+
+	<node name="laserscan_kinect" pkg="laserscan_kinect" type	="laserscan_kinect" output="screen">
+      <!-- In -->
+      <remap from="image"       to="/synchronized/image"/>
+      <remap from="camera_info" to="/synchronized/camera_info"/>
+      <!-- Out -->
+	  	<remap from="scan" to="kinect_scan"/>
+      
+      <rosparam if="$(arg simulation)"     command="load" file="$(find vva_cliff_detector)/config/laserscan_kinect_params_simulation.yaml"/>
+      <rosparam unless="$(arg simulation)" command="load" file="$(find vva_cliff_detector)/config/laserscan_kinect_params.yaml"/>
+	</node>
+  
+
+  <!-- 5. Start the filter for laserscan_kinect LaserScan -->
+  
+  <group ns="vva_lidar_filter">
+
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laserscan_kinect_filter" output="screen" >
+      <rosparam command="load" file="$(find vva_lidar_filter)/config/laserscan_filter_params.yaml" />
+      <!-- In -->
+      <remap from="scan" to="/kinect_scan" />
+      <!-- Out -->
+      <remap from="scan_filtered" to="kinect_scan" />
+    </node>
+
+  </group>
+
+
+</launch>
+
+

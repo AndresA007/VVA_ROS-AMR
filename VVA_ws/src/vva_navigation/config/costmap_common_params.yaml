@@ -1,0 +1,128 @@
+#######################################################################
+# Common parmeters for the "global_costmap" and the "local_costmap"
+#######################################################################
+
+# Costmap2d: obstacles: Global Filtering Parameters:
+# (https://wiki.ros.org/costmap_2d/hydro/obstacles)
+max_obstacle_height: 0.30  # The maximum height of any obstacle to be inserted into the costmap in meters.
+obstacle_range: 2.0   # The maximum range in meters at which to insert obstacles into the costmap using sensor data.
+raytrace_range: 3.0   # The maximum range in meters at which to raytrace out obstacles from the map using sensor data.
+
+#~ robot_radius: 0.17    # distance a circular robot should be clear of the obstacle
+
+###################################
+# Common costmap layers:
+###################################
+
+obstacle_layer:
+##############
+  # (https://wiki.ros.org/costmap_2d/hydro/obstacles)
+  # Parameters for ObstacleLayer (2D):
+  enabled:               true
+  track_unknown_space:   false # "false": states: obstacle or free. "true": states: obstacle, free, or unknown.
+  footprint_clearing_enabled: true # If true, the robot footprint will mark as free the space in which it travels
+  combination_method:    1         # 0=Overwrite, 1=Maximum, 99=Nothing
+
+  observation_sources: rplidar laserscan_kinect #rtabmapcloud
+  
+  rplidar: {data_type: LaserScan, sensor_frame: rplidar_frame, clearing: true, marking: true, topic: /rplidar_scan,
+            expected_update_rate: 3.6, min_obstacle_height: 0.00, max_obstacle_height: 0.30}
+            
+  #~ laserscan_kinect: {data_type: LaserScan, sensor_frame: camera_link,   clearing: true, marking: true, topic: /vva_lidar_filter/kinect_scan,
+            #~ expected_update_rate: 2.0, min_obstacle_height: 0.00, max_obstacle_height: 0.26}
+  laserscan_kinect: {data_type: LaserScan, sensor_frame: camera_link,   clearing: true, marking: true, topic: /kinect_scan,
+            expected_update_rate: 2.4, min_obstacle_height: 0.00, max_obstacle_height: 0.30}
+            
+  #~ rtabmapcloud: {data_type: PointCloud2, sensor_frame: camera_link, clearing: true, marking: true,
+                      #~ topic: /rtabmap_laptop/point_cloud_xyz/depth_image_cloud, expected_update_rate: 0.5,
+                      #~ min_obstacle_height: 0.0, max_obstacle_height: 0.26}
+                      
+
+
+
+
+#~ obstacle_voxel_layer:
+#~ ##############
+  #~ # (https://wiki.ros.org/costmap_2d/hydro/obstacles)
+  #~ # Parameters for VoxelLayer (2.5D):
+  #~ enabled:              true
+  #~ origin_z:             0   # The z origin of the map in meters
+  #~ z_resolution:         0.05
+  #~ z_voxels:             10  # The number of voxels to in each vertical column, the height of the grid is z_resolution * z_voxels
+  #~ unknown_threshold:    10  # The number of unknown cells allowed in a column considered to be "known" 
+  #~ mark_threshold:       1   # The maximum number of marked cells allowed in a column considered to be "free"
+  #~ publish_voxel_map:    false
+  #~ footprint_clearing_enabled:   true  # If true, the robot footprint will clear (mark as free) the space in which it travels.
+  
+  #~ observation_sources:  depth_camera_1 #lidar_1
+  
+  #~ lidar_1: {data_type: LaserScan, sensor_frame: rplidar_frame, clearing: true, marking: true, topic: /rplidar_scan,
+            #~ expected_update_rate: 0.6, min_obstacle_height: 0.00, max_obstacle_height: 0.26}
+            
+  #~ depth_camera_1: {data_type: PointCloud2, sensor_frame: camera_link, clearing: true, marking: true, topic: /camera/depth/points,
+                   #~ expected_update_rate: 15.0, min_obstacle_height: 0.00, max_obstacle_height: 0.26}
+    
+
+
+
+#~ spatio_temporal_obstacle_layer:
+#~ ##############
+  #~ # (https://github.com/SteveMacenski/spatio_temporal_voxel_layer/tree/melodic-devel)
+  #~ # Parameters for SpatioTemporalVoxelLayer (2.5D):
+  #~ enabled:               true
+  #~ voxel_decay:           10     #seconds if linear, e^n if exponential
+  #~ decay_model:           0      #0=linear, 1=exponential, -1=persistent
+  #~ voxel_size:            0.04   #meters
+  #~ track_unknown_space:   true   #default space is unknown
+  #~ observation_persistence: 0.0  #seconds
+  #~ max_obstacle_height:   0.26    #meters
+  #~ unknown_threshold:     10     #voxel height
+  #~ mark_threshold:        3      #set to "2" to avoid detecting the floor as an obstacle (when using PointCloud2)
+  #~ update_footprint_enabled: true
+  #~ combination_method:    1      #1=max, 0=override
+  #~ obstacle_range:        3.0    #meters
+  #~ origin_z:              0.0    #meters
+  #~ publish_voxel_map:     false   # default off
+  #~ transform_tolerance:   1.0    # seconds
+  #~ mapping_mode:          false  # default off, saves map not for navigation
+  #~ map_save_duration:     60     #default 60s, how often to autosave
+  
+  #~ observation_sources:   rtabmapcloud
+  
+  #~ rtabmapcloud: {data_type: PointCloud2, sensor_frame: camera_link, clearing: true, marking: true,
+                      #~ topic: /rtabmap_laptop/point_cloud_xyz/depth_image_cloud, expected_update_rate: 0.7,
+                      #~ min_obstacle_height: 0.0, max_obstacle_height: 0.26}
+
+                      
+
+
+
+cliff_detector_obstacle_layer:
+##############
+  # (https://answers.ros.org/question/291242/adding-a-new-layer-to-costmap-for-avoiding-downward-stairs-for-operator-node/)
+  enabled:              true
+  keep_time:            0.5    # Pause before clearing points list
+  point_radius:         0.05    # Radius of points which will be add to costmap
+  robot_radius:         0.25    # Radius of the robot
+
+
+
+
+
+
+static_layer:
+##############
+  # (http://wiki.ros.org/costmap_2d/hydro/staticmap)
+  enabled:                true
+  unknown_cost_value:     -1     # The value for which a cost should be considered unknown when reading in a map from the map server.
+  lethal_cost_threshold:  100    # The threshold value at which to consider a cost lethal when reading in a map from the map server.
+  map_topic:              map    # The topic that the costmap subscribes to for the static map.
+  first_map_only:         false  # Only subscribe to the first message on the map topic, ignoring all subsequent messages
+  subscribe_to_updates:   false  # In addition to map_topic, also subscribe to map_topic + "_updates"
+  track_unknown_space:    true   # true: unknown values in the map are translated directly to the layer. false: are translated as FREE_SPACE.
+  use_maximum:            false  # Only matters if static layer isn't bottom layer. true: only maximum value will be written to costmap. 
+  trinary_costmap:        true   # true: translates all map values to NO_INFORMATION/FREE_SPACE/LETHAL_OBSTACLE. false: full spectrum of values.
+  
+
+
+
