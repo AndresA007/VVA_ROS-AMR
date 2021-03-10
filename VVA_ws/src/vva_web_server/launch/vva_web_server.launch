@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <!-- 1. Start the rosbridge_server -->
+  
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+
+
+
+  <!-- 2. Start the web_video_server -->
+  
+  <node pkg="web_video_server" type="web_video_server" name="web_video_server" output="log" >
+    
+     <!-- See the parameters description at: https://wiki.ros.org/web_video_server -->
+     
+     <param name="port"              type="int"    value="8080"/>
+     <param name="address"           type="string" value="0.0.0.0"/>
+     <param name="server_threads"    type="int"    value="1"/>
+     <param name="ros_threads"       type="int"    value="2"/>
+     
+     <!-- stream or snapshot image parameters -->
+     <param name="width"             type="int"    value="640"/>
+     <param name="height"            type="int"    value="480"/>
+     <!--param name="invert"                          value=""/-->
+     <param name="quality"           type="int"    value="90"/>  <!-- The jpeg image quality (1...100) -->
+     <param name="default_transport" type="string" value="raw"/>  <!-- raw, compressed, theora -->
+
+     <!-- Stream parameters -->
+     <param name="type"              type="string" value="mjpeg"/> <!-- mjpeg, vp8, ros_compressed, png, h264 -->
+     
+     <!-- VP8 Stream Parameters -->
+     <param name="bitrate"           type="int"    value="100000"/>
+     <param name="qmin"              type="int"    value="10"/>
+     <param name="qmax"              type="int"    value="42"/>
+     <param name="gop"               type="int"    value="250"/>
+     <!--param name="quality"           type="string" value="realtime"/-->  <!-- best, good, realtime -->
+     
+  </node>  
+  
+</launch>
+

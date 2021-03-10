@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="database_path_simulation" default="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo_v0.6.1/Rtabmap_SavedMaps/rtabmap_simulation.db"/>
+  <arg name="database_path_simulation" default="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/Rtabmap_SavedMaps/rtabmap_simulation.db"/>
   <arg name="rtabmapviz"        default="false"/>
   <arg name="localization"      default="false"/>
   
