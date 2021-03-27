@@ -1,41 +1,69 @@
 <?xml version="1.0"?>
 <launch>
-  
+
   <!-- 1. Start the rosbridge_server -->
-  
+
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 
 
-
   <!-- 2. Start the web_video_server -->
-  
+
   <node pkg="web_video_server" type="web_video_server" name="web_video_server" output="log" >
-    
+
      <!-- See the parameters description at: https://wiki.ros.org/web_video_server -->
-     
+
      <param name="port"              type="int"    value="8080"/>
      <param name="address"           type="string" value="0.0.0.0"/>
      <param name="server_threads"    type="int"    value="1"/>
      <param name="ros_threads"       type="int"    value="2"/>
-     
+
      <!-- stream or snapshot image parameters -->
      <param name="width"             type="int"    value="640"/>
      <param name="height"            type="int"    value="480"/>
-     <!--param name="invert"                          value=""/-->
+     <param name="invert"                          value=""/>
      <param name="quality"           type="int"    value="90"/>  <!-- The jpeg image quality (1...100) -->
      <param name="default_transport" type="string" value="raw"/>  <!-- raw, compressed, theora -->
 
      <!-- Stream parameters -->
      <param name="type"              type="string" value="mjpeg"/> <!-- mjpeg, vp8, ros_compressed, png, h264 -->
-     
+
      <!-- VP8 Stream Parameters -->
      <param name="bitrate"           type="int"    value="100000"/>
      <param name="qmin"              type="int"    value="10"/>
      <param name="qmax"              type="int"    value="42"/>
      <param name="gop"               type="int"    value="250"/>
      <!--param name="quality"           type="string" value="realtime"/-->  <!-- best, good, realtime -->
-     
-  </node>  
-  
-</launch>
 
+  </node>
+
+
+  <!-- 3. Start robot_pose_publisher -->
+
+  <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" output="log" >
+
+     <param name="map_frame"         type="string" value="/map"/>
+     <param name="base_frame"        type="string" value="/base_footprint"/>
+     <param name="publish_frequency" type="double" value="10"/>
+     <param name="is_stamped"        type="bool"   value="false"/>  <!-- Publish "geometry_msgs/PoseStamped" or "geometry_msgs/Pose" -->
+
+     <!-- Out -->
+     <remap from="robot_pose" to="/map_robot_pose" />
+
+  </node>
+
+
+  <!-- 4. Start Web vva_robot_management -->
+
+  <node pkg="vva_web_server" type="vva_robot_management_node.py" name="vva_robot_management" output="screen" >
+
+     <param name="rate"               type="int"    value="1"/>
+     <param name="rtabmap_launchfile" type="string"
+       value="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch"
+     />  <!-- This node automatically launches and stops the rtabmap launchfile -->
+
+     <!-- Out -->
+     <remap from="map_size" to="~map_size" />  <!-- Size of the rtabmap database_path in MB -->
+
+  </node>
+
+</launch>

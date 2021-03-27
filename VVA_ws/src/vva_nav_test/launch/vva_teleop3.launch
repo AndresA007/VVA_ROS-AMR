@@ -4,7 +4,7 @@
     <param name="hz" value="10" type="double"/>    <!-- Frequency at which the cmd_vel messages are sent -->
     <param name="forward_rate" value="0.3" type="double"/>   <!-- Speed to move forward in m/s -->
     <param name="backward_rate" value="0.2" type="double"/>   <!-- Speed to move backward in m/s -->
-    <param name="rotation_rate" value="0.6" type="double"/>   <!-- Speed of in place rotation in rad/s -->
+    <param name="rotation_rate" value="0.8" type="double"/>   <!-- Speed of in place rotation in rad/s -->
     
     <!-- Out -->
     <remap from="/key_vel" to="cmd_vel"/>
