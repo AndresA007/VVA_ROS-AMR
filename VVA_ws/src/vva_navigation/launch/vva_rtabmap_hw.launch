@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="database_path_hw"         default="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_navigation/maps/rtabmap.db"/>
+  <arg name="database_path_hw"         default="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/maps/rtabmap.db"/>
   <arg name="localization"      default="false"/>
   
   <arg     if="$(arg localization)" name="args"  default=""/>

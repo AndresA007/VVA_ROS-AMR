@@ -21,7 +21,7 @@
     <param name="robot_wheel_diameter" value="0.13" />
     
     <param name="calibration_file_path"
-      value="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
+      value="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
     />
     
     <param name="pid_on" value="$(arg wheels_pid_on)" />

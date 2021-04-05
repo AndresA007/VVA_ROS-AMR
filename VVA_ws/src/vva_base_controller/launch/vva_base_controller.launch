@@ -17,11 +17,11 @@
     <param name="robot_wheel_diameter" value="0.13" />   <!-- Diameter in meters of the robot wheels -->
     
     <param name="calibration_file_path"
-      value="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
+      value="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
     />  <!-- Here are stored all the motor calibration parameters. Delete this file if recalibration is required. -->
     
     <!--param name="calibration_file_path"
-      value="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo_v0.6.1/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
+      value="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_base_controller/wheels_calibration/wheels_calibration.txt"
     /-->  <!-- This file is created by the calibration node, here are stored all the motor calibration parameters -->
     
     <param name="pid_on" value="True" />  <!-- Enable PID control -->

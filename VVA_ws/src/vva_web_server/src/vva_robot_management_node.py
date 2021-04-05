@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #------------------------------------------------------------------------------
 # Copyright (c) 2021, Andres A. <andres.arboleda AT gmail DOT com>
@@ -130,9 +130,13 @@ class WebRobotManagement:
     # Execute several times while rtabmap is running
     if self.isMappingStarted:
       # Check the map database file size
-      file_size_MB = os.path.getsize(self.map_db_file)/(1024*1024)
-      #Publish the topic with the map size
-      self.map_size_pub.publish(file_size_MB)
+      try :
+        file_size_MB = int( os.path.getsize(self.map_db_file)/(1024*1024) )
+        #Publish the topic with the map size
+        self.map_size_pub.publish(file_size_MB)
+      except Exception as err:
+        rospy.loginfo("vva_robot_management: An exception happend: " + str(err))
+
       self.status_pub.publish(MAPPING)
     else:
       self.status_pub.publish(IDLE)

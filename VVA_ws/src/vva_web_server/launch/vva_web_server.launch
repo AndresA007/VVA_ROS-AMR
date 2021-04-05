@@ -54,11 +54,14 @@
 
   <!-- 4. Start Web vva_robot_management -->
 
+  <arg name="rtabmap_launch_file"
+    default="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch"
+  />
+
   <node pkg="vva_web_server" type="vva_robot_management_node.py" name="vva_robot_management" output="screen" >
 
      <param name="rate"               type="int"    value="1"/>
-     <param name="rtabmap_launchfile" type="string"
-       value="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch"
+     <param name="rtabmap_launchfile" type="string" value="$(arg rtabmap_launch_file)"
      />  <!-- This node automatically launches and stops the rtabmap launchfile -->
 
      <!-- Out -->
