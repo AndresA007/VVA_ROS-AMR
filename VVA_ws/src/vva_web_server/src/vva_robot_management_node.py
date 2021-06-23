@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 #------------------------------------------------------------------------------
 # Copyright (c) 2021, Andres A. <andres.arboleda AT gmail DOT com>

@@ -22,10 +22,10 @@
      <param name="height"            type="int"    value="480"/>
      <param name="invert"                          value=""/>
      <param name="quality"           type="int"    value="90"/>  <!-- The jpeg image quality (1...100) -->
-     <param name="default_transport" type="string" value="raw"/>  <!-- raw, compressed, theora -->
+     <param name="default_transport" type="string" value="compressed"/>  <!-- raw, compressed, theora -->
 
      <!-- Stream parameters -->
-     <param name="type"              type="string" value="mjpeg"/> <!-- mjpeg, vp8, ros_compressed, png, h264 -->
+     <param name="type"              type="string" value="h264"/> <!-- mjpeg, vp8, ros_compressed, png, h264 -->
 
      <!-- VP8 Stream Parameters -->
      <param name="bitrate"           type="int"    value="100000"/>

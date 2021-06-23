@@ -1,6 +1,6 @@
 #/bin/bash
 
-JNano_IP=192.168.0.13
+JNano_IP=192.168.0.14
 
 # Upload VVA ROS packages to J-Nano:
 #======================================================================================================
@@ -15,7 +15,7 @@ JNano_IP=192.168.0.13
 #JN_PACKAGE7=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_lidar_odom
 #JN_PACKAGE8=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_msgs
 #JN_PACKAGE9=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_nav_test
-JN_PACKAGE10=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation
+#JN_PACKAGE10=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation
 #JN_PACKAGE11=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_robot_healthcheck
 #JN_PACKAGE12=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_rplidar_ros
 
@@ -24,34 +24,33 @@ JN_PACKAGE10=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation
 #JN_PACKAGE15=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_voice_interact_server
 
 #JN_PACKAGE16=$ROS_HOME_WS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_web_server
-#echo "REMEMBER: In the J-Nano: Remove the 3 from #!/usr/bin/env python3 in vva_web_server/src/vva_robot_management_node.py"
 
 
-scp -r \
-  $JN_PACKAGE1 \
-  $JN_PACKAGE2 \
-  $JN_PACKAGE3 \
-  $JN_PACKAGE4 \
-  $JN_PACKAGE5 \
-  $JN_PACKAGE6 \
-  $JN_PACKAGE7 \
-  $JN_PACKAGE8 \
-  $JN_PACKAGE9 \
-  $JN_PACKAGE10 \
-  $JN_PACKAGE11 \
-  $JN_PACKAGE12 \
-  $JN_PACKAGE13 \
-  $JN_PACKAGE14 \
-  $JN_PACKAGE15 \
-  $JN_PACKAGE16 \
-  ubuntu@$JNano_IP:/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/
+#scp -r \
+#  $JN_PACKAGE1 \
+#  $JN_PACKAGE2 \
+#  $JN_PACKAGE3 \
+#  $JN_PACKAGE4 \
+#  $JN_PACKAGE5 \
+#  $JN_PACKAGE6 \
+#  $JN_PACKAGE7 \
+#  $JN_PACKAGE8 \
+#  $JN_PACKAGE9 \
+#  $JN_PACKAGE10 \
+#  $JN_PACKAGE11 \
+#  $JN_PACKAGE12 \
+#  $JN_PACKAGE13 \
+#  $JN_PACKAGE14 \
+#  $JN_PACKAGE15 \
+#  $JN_PACKAGE16 \
+#  ubuntu@$JNano_IP:/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/
 
 
 # Upload the scripts to run the nodes on backgroud:
 #--------------------------------------------
-#~ scp -r \
-  #~ $ROS_HOME_WS/VehiculoVigilanciaAutonomo_v0.6.1/RunAsBackgroundScript \
-  #~ ubuntu@$JNano_IP:/home/ubuntu/ROS/VehiculoVigilanciaAutonomo_v0.6.1/
+scp -r \
+  $ROS_HOME_WS/VehiculoVigilanciaAutonomo/RunAsBackgroundScript \
+  ubuntu@$JNano_IP:/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/
 
 
 # Upload the Email Notification And Watchdog Scripts:

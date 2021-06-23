@@ -33,15 +33,20 @@
 # 
 # Created by:
 # andres.arboleda AT gmail DOT com, (october/2020)
+#
+# Modified by:
+# andres.arboleda AT gmail DOT com, (april/2021)
 #------------------------------------------------------------------------------
 
 # This script starts the launch files of VVA in background.
 # If the argument "start_mapping" is given, it starts only:
+# - vva_web_server.launch (rosbridge_server, web_video_server, robot_pose_publisher, vva_robot_management)
 # - vva_jnano_lowlevel_consolidated.launch (vva_base_controller, kinect, kinect_aux, rplidar and state_publishers)
 # - vva_lidar_odom.launch
-# - vva_rtabmap_hw.launch (in mapping mode)
 # - vva_robot_healthcheck
 #
+#
+# PENDING TO MODIFY:
 # If the argument "start_navigation" is given, it starts the full navigation stack and voice recognition services:
 # - vva_jnano_lowlevel_consolidated.launch (vva_base_controller, kinect, kinect_aux, rplidar and state_publishers)
 # - vva_lidar_odom.launch
@@ -55,9 +60,9 @@
 ROS_LOG_DIR=~/.ros/log
 DATE_AND_HOUR=`date "+%Y%m%d_%H%M%S"`
 
-LIST_OF_PROCESSES=( vva_jnano_lowlevel_consolidated.launch \
+LIST_OF_PROCESSES=( vva_web_server.launch \
+                    vva_jnano_lowlevel_consolidated.launch \
                     vva_lidar_odom.launch \
-                    vva_rtabmap_hw.launch \
                     vva_consolidated_nav.launch \
                     vva_user_intents.launch \
                     vva_deepspeech_v0.8.2_server_main.py \
@@ -80,34 +85,42 @@ case "$1" in
             RPLIDAR_PORT=/dev/ttyUSB0
         fi
         
-        PROCESS_NUMBER=`ps -ef | grep vva_jnano_lowlevel_consolidated.launch | grep -v grep | wc -l`
+        PROCESS_NUMBER=`ps -ef | grep vva_web_server.launch | grep -v grep | wc -l`
         if [ "$PROCESS_NUMBER" -gt 0 ]; then
             echo "ROS processes are already running, please stop all ROS processes. Type: ./runVVA_ROSNodesOnBackground.sh stop"
             exit 1
         fi
         
-        # Start the lowlevel_consolidated, lidar_odom and rtabmap (in mapping mode) launch files
+
+        # Start the vva_web_server, lowlevel_consolidated and lidar_odom launch files
         # If the ROS log directory exists, launch the files and create logs
         if [ -d "$ROS_LOG_DIR" ]; then
-            roslaunch vva_jnano_consolidated vva_jnano_lowlevel_consolidated.launch arduino_port:=$ARDUINO_PORT rplidar_port:=$RPLIDAR_PORT \
-                   > $ROS_LOG_DIR/vva_jnano_lowlevel_consolidated_$DATE_AND_HOUR.log 2>&1 &
+            roslaunch vva_web_server vva_web_server.launch \
+                   rtabmap_launch_file:="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_hw.launch" \
+                   > $ROS_LOG_DIR/vva_web_server_$DATE_AND_HOUR.log 2>&1 &
                    
         # If the ROS logs were purged, the log directory wouldn't exists, then, launch the files but this time don't create logs
         else
-            roslaunch vva_jnano_consolidated vva_jnano_lowlevel_consolidated.launch arduino_port:=$ARDUINO_PORT rplidar_port:=$RPLIDAR_PORT \
+            roslaunch vva_web_server vva_web_server.launch \
+                   rtabmap_launch_file:="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_hw.launch" \
                    > /dev/null 2>&1 &
         fi
+        echo "Starting vva_web_server.launch..."
+        sleep 5
+
+        # ROS_LOG_DIR was automatically created in previous step
+        roslaunch vva_jnano_consolidated vva_jnano_lowlevel_consolidated.launch arduino_port:=$ARDUINO_PORT rplidar_port:=$RPLIDAR_PORT \
+               > $ROS_LOG_DIR/vva_jnano_lowlevel_consolidated_$DATE_AND_HOUR.log 2>&1 &
         echo "Starting vva_jnano_lowlevel_consolidated.launch..."
         sleep 7
         
-        # ROS_LOG_DIR was automatically created in previous step
         roslaunch vva_lidar_odom vva_lidar_odom.launch > $ROS_LOG_DIR/vva_lidar_odom_$DATE_AND_HOUR.log 2>&1 &
         echo "Starting vva_lidar_odom.launch..."
         sleep 5
 
-        roslaunch vva_navigation vva_rtabmap_hw.launch localization:=false > $ROS_LOG_DIR/vva_rtabmap_hw_$DATE_AND_HOUR.log 2>&1 &
-        echo "Starting vva_rtabmap_hw.launch in mapping mode..."
-        sleep 5
+#        roslaunch vva_navigation vva_rtabmap_hw.launch localization:=false > $ROS_LOG_DIR/vva_rtabmap_hw_$DATE_AND_HOUR.log 2>&1 &
+#        echo "Starting vva_rtabmap_hw.launch in mapping mode..."
+#        sleep 5
         
         roslaunch vva_robot_healthcheck vva_robot_healthcheck.launch > $ROS_LOG_DIR/vva_robot_healthcheck_$DATE_AND_HOUR.log 2>&1 &
         echo "Starting vva_robot_healthcheck.launch in mapping mode..."
