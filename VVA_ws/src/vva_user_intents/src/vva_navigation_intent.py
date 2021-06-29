@@ -34,14 +34,14 @@
 # Created by:
 # andres.arboleda AT gmail DOT com, (aug/2020)
 # Modified by:
-# andres.arboleda AT gmail DOT com, (nov/2020)
+# andres.arboleda AT gmail DOT com, (jun/2021)
 #------------------------------------------------------------------------------
 
 
 import rospy
 from geometry_msgs.msg import PoseStamped
 from vva_msgs.msg import NavCorrectionStatus
-from vva_msgs.srv import VVAVoiceCommandIntent
+from vva_msgs.srv import VVAVoiceCommandIntent, VVAGoalsItinerary
 from std_srvs.srv import Empty
 import actionlib
 import tf
@@ -61,8 +61,9 @@ class NavigationIntent:
     self.simple_goal_pub = rospy.Publisher('vva_navigation_simple/goal', PoseStamped, queue_size=10)
     
     # Published services
-    self.navigate_to_srv      = rospy.Service('~navigate_to',      VVAVoiceCommandIntent, self.navigate_to_srv_callback)
-    self.start_patrolling_srv = rospy.Service('~start_patrolling', VVAVoiceCommandIntent, self.start_patrolling_srv_callback)
+    self.navigate_to_name_srv      = rospy.Service('~navigate_to_name',      VVAVoiceCommandIntent, self.navigate_to_name_srv_callback)
+    self.start_saved_itinerary_srv = rospy.Service('~start_saved_itinerary', VVAVoiceCommandIntent, self.start_saved_itinerary_srv_callback)
+    self.start_itinerary_srv = rospy.Service('~start_itinerary', VVAGoalsItinerary, self.start_itinerary_srv_callback)
     self.stop_navigation_srv  = rospy.Service('~stop_navigation',  VVAVoiceCommandIntent, self.stop_navigation_srv_callback)
 
     # Parameters
@@ -76,11 +77,13 @@ class NavigationIntent:
     self.goal_status = actionlib.GoalStatus.ACTIVE
     
     # Other global variables
-    self.navigate_to_pending_to_attend = False
-    self.start_patrolling_pending_to_attend = False
+    self.navigate_to_name_pending_to_attend = False
+    self.start_saved_itinerary_pending_to_attend = False
+    self.start_itinerary_pending_to_attend = False
     self.stop_navigation_pending_to_attend = False
     
-    self.navigate_to_arg = ""
+    self.navigate_to_name_arg = ""
+    self.start_itinerary_arg = None
     
     # Instantiate a TF listener to transform coordinates between frames
     self.tf_listener = tf.TransformListener()
@@ -92,14 +95,19 @@ class NavigationIntent:
   def goal_status_topic_callback(self,msg):
     self.goal_status = msg.status
 
-  def navigate_to_srv_callback(self,req):
-    self.navigate_to_pending_to_attend = True
-    self.navigate_to_arg = req.intent_service_arg
-    return "ACCEPTED_NAVIGATE_TO"
+  def navigate_to_name_srv_callback(self,req):
+    self.navigate_to_name_pending_to_attend = True
+    self.navigate_to_name_arg = req.intent_service_arg
+    return "ACCEPTED_NAVIGATE_TO_NAME"
     
-  def start_patrolling_srv_callback(self,req):
-    self.start_patrolling_pending_to_attend = True
-    return "ACCEPTED_START_PATROLLING"
+  def start_saved_itinerary_srv_callback(self,req):
+    self.start_saved_itinerary_pending_to_attend = True
+    return "ACCEPTED_START_SAVED_ITINERARY"
+
+  def start_itinerary_srv_callback(self, req):
+    self.start_itinerary_pending_to_attend = True
+    self.start_itinerary_arg = req.goals
+    return "ACCEPTED_START_ITINERARY"
     
   def stop_navigation_srv_callback(self,req):
     self.stop_navigation_pending_to_attend = True
@@ -107,9 +115,12 @@ class NavigationIntent:
   
   
   # ==================================================
-  # Navigate to ...
+  # Navigate to <location_name>
+  # args:
+  # * goal_location_name: The name of the location as stored in the 'location_names' param
+  #                       configured in the config .yaml files.
   # ==================================================
-  def navigate_to(self, goal_location_name):
+  def navigate_to_name(self, goal_location_name):
 
     # Get the coordinates of the goal location
     location_exists, goal_x, goal_y, goal_frame = self.resolve_location(goal_location_name)
@@ -117,7 +128,19 @@ class NavigationIntent:
     if location_exists == False:
       rospy.loginfo('vva_navigation_intent: Location "%s" not found, aborting "navigate to" intent.', goal_location_name)
       return
-    
+
+    return self.navigate_to_xy(goal_x, goal_y, goal_frame)
+
+
+
+  # ==================================================
+  # Navigate to <coordinates_location>
+  # args:
+  # * goal_x, goal_y: The x, y coordinates of the location.
+  # * goal_frame:     The reference frame where the coordinates belong to.
+  # ==================================================
+  def navigate_to_xy(self, goal_x, goal_y, goal_frame):
+
     # Wait for vva_navigation_correction to be ready to receive a new goal
     while self.goal_status == actionlib.GoalStatus.ACTIVE:
       # Check if a stop navigation intent was received
@@ -230,24 +253,52 @@ class NavigationIntent:
   
   
   # ==================================================
-  # Start patrolling
+  # Start saved itinerary
   # ==================================================
-  def start_patrolling(self):
+  def start_saved_itinerary(self):
     
     goal_status_list = [0] * len(self.patrolling_itinerary)
     goal_elapsed_times_list = [0.0] * len(self.patrolling_itinerary)
     
     for i, itin_location in enumerate(self.patrolling_itinerary):
-      goal_status_list[i], goal_elapsed_times_list[i] = self.navigate_to(itin_location)
+      goal_status_list[i], goal_elapsed_times_list[i] = self.navigate_to_name(itin_location)
       
       # If goal was cancelled by the user, don't continue with the patrolling
       if goal_status_list[i] == actionlib.GoalStatus.PREEMPTED or goal_status_list[i] == actionlib.GoalStatus.RECALLED:
         break
       
+    # Once all the goals (locations) are processed, print a status summary
+    rospy.loginfo('vva_navigation_intent: --------------------------------------------')
+    rospy.loginfo('vva_navigation_intent: Saved itinerary Goals status:')
+    rospy.loginfo('vva_navigation_intent: location_name,status,time_elapsed(s)')
+    i = 0
+    while i < len(self.patrolling_itinerary):
+      rospy.loginfo("vva_navigation_intent: %s,%d,%.1f", self.patrolling_itinerary[i], goal_status_list[i], goal_elapsed_times_list[i])
+      i += 1
+    rospy.loginfo('vva_navigation_intent: --------------------------------------------')
+
+
+
+  # ==================================================
+  # Start itinerary
+  # ==================================================
+  def start_itinerary(self, goals):
+    
+    goal_status_list = [0] * len(goals)
+    goal_elapsed_times_list = [0.0] * len(goals)
+    
+    for i, itin_location in enumerate(goals):
+      goal_status_list[i], goal_elapsed_times_list[i] = self.navigate_to_xy(itin_location.pose.position.x,
+                                                                            itin_location.pose.position.y,
+                                                                            itin_location.frame)
+      
+      # If goal was cancelled by the user, don't continue with the patrolling
+      if goal_status_list[i] == actionlib.GoalStatus.PREEMPTED or goal_status_list[i] == actionlib.GoalStatus.RECALLED:
+        break
       
     # Once all the goals (locations) are processed, print a status summary
     rospy.loginfo('vva_navigation_intent: --------------------------------------------')
-    rospy.loginfo('vva_navigation_intent: Patrolling Goals status:')
+    rospy.loginfo('vva_navigation_intent: Requested itinerary Goals status:')
     rospy.loginfo('vva_navigation_intent: location_name,status,time_elapsed(s)')
     i = 0
     while i < len(self.patrolling_itinerary):
@@ -258,21 +309,27 @@ class NavigationIntent:
 
 
 
+
   # ==================================================
   # Update function
   # ==================================================
   def update(self):
     
-    if self.navigate_to_pending_to_attend:
-      rospy.loginfo('vva_navigation_intent: Received intent execution request: "navigate_to: ' + self.navigate_to_arg + '"')
-      self.navigate_to(self.navigate_to_arg)
-      self.navigate_to_pending_to_attend = False
+    if self.navigate_to_name_pending_to_attend:
+      rospy.loginfo('vva_navigation_intent: Received intent execution request: "navigate_to_name: ' + self.navigate_to_name_arg + '"')
+      self.navigate_to_name(self.navigate_to_name_arg)
+      self.navigate_to_name_pending_to_attend = False
 
-    elif self.start_patrolling_pending_to_attend:
-      rospy.loginfo('vva_navigation_intent: Received intent execution request: "start_patrolling"')
-      self.start_patrolling()
-      self.start_patrolling_pending_to_attend = False
+    elif self.start_saved_itinerary_pending_to_attend:
+      rospy.loginfo('vva_navigation_intent: Received intent execution request: "start_saved_itinerary"')
+      self.start_saved_itinerary()
+      self.start_saved_itinerary_pending_to_attend = False
     
+    elif self.start_itinerary_pending_to_attend:
+      rospy.loginfo('vva_navigation_intent: Received intent execution request: "start_itinerary"')
+      self.start_itinerary(self.start_itinerary_arg)
+      self.start_itinerary_pending_to_attend = False
+
 
 
   # ==================================================

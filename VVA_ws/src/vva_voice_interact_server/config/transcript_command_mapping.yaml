@@ -1,14 +1,14 @@
 # Map between transcripts and ROS services
 # Use '*' to indicate the part of the transcript that will be passed to the plugin as an argument of the service
 transcripts_mapping:
-  - {key: "go to *",                    service: "/vva_navigation_intent/navigate_to"}
-  - {key: "come to *",                  service: "/vva_navigation_intent/navigate_to"}
+  - {key: "go to *",                    service: "/vva_navigation_intent/navigate_to_name"}
+  - {key: "come to *",                  service: "/vva_navigation_intent/navigate_to_name"}
   
-  - {key: "start patrolling",           service: "/vva_navigation_intent/start_patrolling"}
-  - {key: "start itinerary",            service: "/vva_navigation_intent/start_patrolling"}
-  - {key: "go round",                   service: "/vva_navigation_intent/start_patrolling"}
-  - {key: "give a round",               service: "/vva_navigation_intent/start_patrolling"}
-  - {key: "to patrol",               service: "/vva_navigation_intent/start_patrolling"}
+  - {key: "start patrolling",           service: "/vva_navigation_intent/start_saved_itinerary"}
+  - {key: "start itinerary",            service: "/vva_navigation_intent/start_saved_itinerary"}
+  - {key: "go round",                   service: "/vva_navigation_intent/start_saved_itinerary"}
+  - {key: "give a round",               service: "/vva_navigation_intent/start_saved_itinerary"}
+  - {key: "to patrol",               service: "/vva_navigation_intent/start_saved_itinerary"}
   
   - {key: "stop",                       service: "/vva_navigation_intent/stop_navigation"}
   - {key: "don't move",                 service: "/vva_navigation_intent/stop_navigation"}

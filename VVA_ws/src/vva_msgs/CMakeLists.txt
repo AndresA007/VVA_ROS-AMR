@@ -9,6 +9,7 @@ project(vva_msgs)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
    std_msgs
+   geometry_msgs
    message_generation
 )
 
@@ -51,6 +52,7 @@ add_message_files(
    OdomCorrectionStatus.msg
    NavCorrectionStatus.msg
    MotorCalibrationParams.msg
+   VVAPoseFramed.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -60,6 +62,7 @@ add_service_files(
 #   Service2.srv
    VVARecognizeSpeech.srv
    VVAVoiceCommandIntent.srv
+   VVAGoalsItinerary.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -73,6 +76,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
+  geometry_msgs
 )
 
 ################################################
