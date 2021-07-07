@@ -433,7 +433,9 @@ VehiculoVigilanciaAutonomo_v0.6.2:
              cd /home/theuser/AAData/Documents2/WebDevelopment/VVA_ManagementConsole/
              npm start
           # Start the modules to integrate with the Web client: rosbridge_server, web_video_server, robot_pose_publisher and vva_robot_management:
-             roslaunch vva_web_server vva_web_server.launch rtabmap_launch_file:="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch" 2> >(grep -v 'TF_REPEATED_DATA \| line\ 278')
+             roslaunch vva_web_server vva_web_server.launch \
+                rtabmap_launch_file:="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch" \
+                2> >(grep -v 'TF_REPEATED_DATA \| line\ 278')
           # Deploy the model in Gazebo:
              roslaunch vva_gazebo vva_world.launch
           # Start rviz and the state_publishers:
@@ -449,9 +451,9 @@ VehiculoVigilanciaAutonomo_v0.6.2:
           
           # PENDING TO MIGRATE - MANAGED FROM vva_robot_management_node.py --  Start rtabmap:
              roslaunch vva_navigation vva_rtabmap_simulation.launch localization:=true
-             
           # Start the modules: navigation (move_base), image-camera_info sync, laserscan_kinect, laserscan_kinect_filter and vva_navigation_correction:
              roslaunch vva_navigation vva_consolidated_nav.launch simulation:=true
+             
           # Update the location coordinates in navigation_intent_params_simulation.yaml and start the navigation-intent node:
              roslaunch vva_user_intents vva_user_intents.launch simulation:=true
              

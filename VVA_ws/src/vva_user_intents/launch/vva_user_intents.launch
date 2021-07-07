@@ -6,7 +6,7 @@
   <arg name="simulation" default="false"/>
 
   <!-- Start the node in charge of executing the user intents related to navigation -->
-  <node pkg="vva_user_intents" type="vva_navigation_intent.py" name="vva_navigation_intent" output="log">
+  <node pkg="vva_user_intents" type="vva_navigation_intent.py" name="vva_navigation_intent" output="screen">
     
     <rosparam if="$(arg simulation)"     command="load" file="$(find vva_user_intents)/config/navigation_intent_params_simulation.yaml"/>
     <rosparam unless="$(arg simulation)" command="load" file="$(find vva_user_intents)/config/navigation_intent_params.yaml"/>

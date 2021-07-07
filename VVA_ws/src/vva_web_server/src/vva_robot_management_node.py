@@ -33,6 +33,8 @@
 #
 # Created by:
 # andres.arboleda AT gmail DOT com, (mar/2021)
+# Modified by:
+# andres.arboleda AT gmail DOT com, (jul/2021)
 #------------------------------------------------------------------------------
 
 
@@ -44,8 +46,9 @@ import os
 import roslaunch
 
 # status topic constants
-IDLE     = 0
-MAPPING  = 1
+IDLE        = 0
+MAPPING     = 1
+NAVIGATING  = 2
 
 # In charge of managing the ROS system based on communication with the FrontEnd.
 # Launches and closes rtabmap launchfiles.
@@ -62,8 +65,9 @@ class WebRobotManagement:
     self.map_size_pub = rospy.Publisher('~map_size', UInt16, queue_size=10)
 
     # Published services
-    self.stop_mapping_srv    = rospy.Service('~stop_mapping',  Empty, self.stop_mapping_srv_callback)
-    self.start_mapping_srv   = rospy.Service('~start_mapping', Empty, self.start_mapping_srv_callback)
+    self.stop_mapping_srv       = rospy.Service('~stop_mapping',     Empty, self.stop_mapping_srv_callback)
+    self.start_mapping_srv      = rospy.Service('~start_mapping',    Empty, self.start_mapping_srv_callback)
+    self.start_navigation_srv   = rospy.Service('~start_navigation', Empty, self.start_navigation_srv_callback)
 
     # Parameters
     self.rate               = rospy.get_param('~rate', 1)
@@ -74,9 +78,10 @@ class WebRobotManagement:
     # self.goal_status = actionlib.GoalStatus.ACTIVE
 
     # State
-    self.isMappingStarted      = False
-    self.pendingToStartMapping = False
-    self.pendingToStopMapping  = False
+    self.currentStatus            = IDLE
+    self.pendingToStartMapping    = False
+    self.pendingToStopMapping     = False
+    self.pendingToStartNavigation = False
 
     # Other global vars
     self.map_db_file           = ""
@@ -100,6 +105,11 @@ class WebRobotManagement:
     self.pendingToStopMapping = True
     return []
 
+  def start_navigation_srv_callback(self,req):
+    rospy.loginfo("vva_robot_management: start navigation service called.")
+    self.pendingToStartNavigation = True
+    return []
+
 
 
   # ==================================================
@@ -107,6 +117,9 @@ class WebRobotManagement:
   # ==================================================
   def update(self):
 
+    # --------------------------------------------
+    # Mapping
+    # --------------------------------------------
     # Execute only once, when the start_mapping service is called
     if self.pendingToStartMapping:
       # Start the rtabmap mapping
@@ -118,7 +131,7 @@ class WebRobotManagement:
       self.rtabmap_launch_parent.start()
 
       # Update the state
-      self.isMappingStarted = True
+      self.currentStatus = MAPPING
       self.pendingToStartMapping = False
 
       rospy.loginfo("vva_robot_management: mapping (rtabmap) started.")
@@ -127,8 +140,52 @@ class WebRobotManagement:
       self.map_db_file = rospy.get_param('/rtabmap_jnano/rtabmap/database_path', "")
       rospy.loginfo("vva_robot_management: The rtabmap/database_path is: %s", self.map_db_file)
 
+    # Execute only once, when the stop_mapping service is called
+    if self.pendingToStopMapping:
+      # Stop the rtabmap mapping
+      self.rtabmap_launch_parent.shutdown()
+
+      # Update the state
+      self.currentStatus = IDLE
+      self.pendingToStopMapping = False
+
+      rospy.loginfo("vva_robot_management: mapping (rtabmap) stopped.")
+
+    # --------------------------------------------
+    # Navigation
+    # --------------------------------------------
+    # Execute only once, when the start_navigation service is called
+    if self.pendingToStartNavigation:
+      # Start the rtabmap in navigation mode
+      cli_args = [self.rtabmap_launchfile, 'localization:=true']
+      roslaunch_args = cli_args[1:]
+      roslaunch_file = [(roslaunch.rlutil.resolve_launch_arguments(cli_args)[0], roslaunch_args)]
+      uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+      self.rtabmap_launch_parent = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)
+      self.rtabmap_launch_parent.start()
+
+      # Update the state
+      self.currentStatus = NAVIGATING
+      self.pendingToStartNavigation = False
+
+      rospy.loginfo("vva_robot_management: navigation (rtabmap) started.")
+
+      # Get the database_path parameter from rtabmap
+      self.map_db_file = rospy.get_param('/rtabmap_jnano/rtabmap/database_path', "")
+      rospy.loginfo("vva_robot_management: The rtabmap/database_path is: %s", self.map_db_file)
+
+
+      #---------------------------> AQUI VOY!
+      #TODO: Pending to start vva_navigation/vva_consolidated_nav.launch simulation:=true
+      #      Pending to start vva_user_intents/vva_user_intents.launch simulation:=true
+
+
+
+    # --------------------------------------------
+    # Status reporting and other topics publishing
+    # --------------------------------------------
     # Execute several times while rtabmap is running
-    if self.isMappingStarted:
+    if self.currentStatus == MAPPING:
       # Check the map database file size
       try :
         file_size_MB = int( os.path.getsize(self.map_db_file)/(1024*1024) )
@@ -138,19 +195,12 @@ class WebRobotManagement:
         rospy.loginfo("vva_robot_management: An exception happend: " + str(err))
 
       self.status_pub.publish(MAPPING)
-    else:
+
+    elif self.currentStatus == NAVIGATING:
+      self.status_pub.publish(NAVIGATING)
+
+    elif self.currentStatus == IDLE:
       self.status_pub.publish(IDLE)
-
-    # Execute only once, when the stop_mapping service is called
-    if self.pendingToStopMapping:
-      # Stop the rtabmap mapping
-      self.rtabmap_launch_parent.shutdown()
-
-      # Update the state
-      self.isMappingStarted = False
-      self.pendingToStopMapping = False
-
-      rospy.loginfo("vva_robot_management: mapping (rtabmap) stopped.")
 
 
 
