@@ -57,12 +57,20 @@
   <arg name="rtabmap_launch_file"
     default="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch"
   />
+  <arg name="nav_consolidated_launch_file"
+    default="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_consolidated_nav.launch"
+  />
+  <arg name="simulation"  default="false"/>
 
   <node pkg="vva_web_server" type="vva_robot_management_node.py" name="vva_robot_management" output="screen" >
 
-     <param name="rate"               type="int"    value="1"/>
-     <param name="rtabmap_launchfile" type="string" value="$(arg rtabmap_launch_file)"
+     <param name="rate"                        type="int"    value="1"/>
+     <param name="rtabmap_launchfile"          type="string" value="$(arg rtabmap_launch_file)"
      />  <!-- This node automatically launches and stops the rtabmap launchfile -->
+     <param name="nav_consolidated_launchfile" type="string" value="$(arg nav_consolidated_launch_file)"
+     />  <!-- This node automatically launches and stops the consolidated navigation launchfile -->
+     <param name="simulation"                  type="string" value="$(arg simulation)"
+     />  <!-- Use only lowercase in this param. "true": running in Gazebo sumulator, "false": running in a real robot. -->
 
      <!-- Out -->
      <remap from="map_size" to="~map_size" />  <!-- Size of the rtabmap database_path in MB -->

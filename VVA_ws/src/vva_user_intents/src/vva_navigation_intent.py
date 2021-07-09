@@ -299,10 +299,10 @@ class NavigationIntent:
     # Once all the goals (locations) are processed, print a status summary
     rospy.loginfo('vva_navigation_intent: --------------------------------------------')
     rospy.loginfo('vva_navigation_intent: Requested itinerary Goals status:')
-    rospy.loginfo('vva_navigation_intent: location_name,status,time_elapsed(s)')
+    rospy.loginfo('vva_navigation_intent: location_x,location_y,status,time_elapsed(s)')
     i = 0
-    while i < len(self.patrolling_itinerary):
-      rospy.loginfo("vva_navigation_intent: %s,%d,%.1f", self.patrolling_itinerary[i], goal_status_list[i], goal_elapsed_times_list[i])
+    while i < len(goals):
+      rospy.loginfo("vva_navigation_intent: %s,%s,%d,%.1f", goals[i].pose.position.x, goals[i].pose.position.y, goal_status_list[i], goal_elapsed_times_list[i])
       i += 1
     rospy.loginfo('vva_navigation_intent: --------------------------------------------')
 
