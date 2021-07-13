@@ -64,13 +64,13 @@ class NavigationIntent:
     self.navigate_to_name_srv      = rospy.Service('~navigate_to_name',      VVAVoiceCommandIntent, self.navigate_to_name_srv_callback)
     self.start_saved_itinerary_srv = rospy.Service('~start_saved_itinerary', VVAVoiceCommandIntent, self.start_saved_itinerary_srv_callback)
     self.start_itinerary_srv = rospy.Service('~start_itinerary', VVAGoalsItinerary, self.start_itinerary_srv_callback)
-    self.stop_navigation_srv  = rospy.Service('~stop_navigation',  VVAVoiceCommandIntent, self.stop_navigation_srv_callback)
+    self.stop_moving_srv  = rospy.Service('~stop_moving',  VVAVoiceCommandIntent, self.stop_moving_srv_callback)
 
     # Parameters
     self.location_names               = rospy.get_param('~location_names')
     self.patrolling_itinerary         = rospy.get_param('~patrolling_itinerary')
     self.rate                         = rospy.get_param('~rate', 10)
-    self.stop_navigation_service_name = rospy.get_param('~stop_navigation_service_name', "/vva_navigation_correction/cancel_goal")
+    self.stop_moving_service_name = rospy.get_param('~stop_moving_service_name', "/vva_navigation_correction/cancel_goal")
     self.map_frame                    = rospy.get_param('~map_frame', "map")
     
     # Global variables for subscribed topics
@@ -80,7 +80,7 @@ class NavigationIntent:
     self.navigate_to_name_pending_to_attend = False
     self.start_saved_itinerary_pending_to_attend = False
     self.start_itinerary_pending_to_attend = False
-    self.stop_navigation_pending_to_attend = False
+    self.stop_moving_pending_to_attend = False
     
     self.navigate_to_name_arg = ""
     self.start_itinerary_arg = None
@@ -109,9 +109,9 @@ class NavigationIntent:
     self.start_itinerary_arg = req.goals
     return "ACCEPTED_START_ITINERARY"
     
-  def stop_navigation_srv_callback(self,req):
-    self.stop_navigation_pending_to_attend = True
-    return "ACCEPTED_STOP_NAVIGATION"
+  def stop_moving_srv_callback(self,req):
+    self.stop_moving_pending_to_attend = True
+    return "ACCEPTED_STOP_MOVING"
   
   
   # ==================================================
@@ -144,9 +144,9 @@ class NavigationIntent:
     # Wait for vva_navigation_correction to be ready to receive a new goal
     while self.goal_status == actionlib.GoalStatus.ACTIVE:
       # Check if a stop navigation intent was received
-      if self.stop_navigation_pending_to_attend:
+      if self.stop_moving_pending_to_attend:
         rospy.loginfo('vva_navigation_intent: Aborting "navigate to" intent because "Stop navigation" intent was received.')
-        self.stop_navigation_pending_to_attend = False
+        self.stop_moving_pending_to_attend = False
         return
       rospy.sleep(0.5)
       
@@ -179,9 +179,9 @@ class NavigationIntent:
     # Send the goal
     
     # Check if a stop navigation intent was received
-    if self.stop_navigation_pending_to_attend:
+    if self.stop_moving_pending_to_attend:
       rospy.loginfo('vva_navigation_intent: Aborting "navigate to" intent because "Stop navigation" intent was received.')
-      self.stop_navigation_pending_to_attend = False
+      self.stop_moving_pending_to_attend = False
       return
         
     rospy.loginfo('vva_navigation_intent: Sending goal: (x=%.1f, y=%.1f) in "%s" frame.',
@@ -195,17 +195,17 @@ class NavigationIntent:
     while self.goal_status == actionlib.GoalStatus.ACTIVE:
       
       # Check if a stop navigation intent was received
-      if self.stop_navigation_pending_to_attend:
+      if self.stop_moving_pending_to_attend:
         # Send a stop navigation (cancel goal) service request to vva_navigation_correction
         try:
           rospy.loginfo('vva_navigation_intent: Cancelling goal...')
-          srv_stop_navigation = rospy.ServiceProxy(self.stop_navigation_service_name, Empty)
-          srv_stop_navigation()
+          srv_stop_moving = rospy.ServiceProxy(self.stop_moving_service_name, Empty)
+          srv_stop_moving()
         except rospy.ServiceException as e:
           rospy.logwarn("vva_navigation_intent: Service failed: " + str(e))
           
         rospy.loginfo('vva_navigation_intent: Aborting "navigate to" intent because "Stop navigation" intent was received.')
-        self.stop_navigation_pending_to_attend = False
+        self.stop_moving_pending_to_attend = False
         # ~ return
         
       rospy.sleep(0.5)
