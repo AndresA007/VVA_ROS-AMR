@@ -13,7 +13,7 @@
     
     <param name="rate" value="10" />      <!-- Frequency at which the node main loop is executed -->
     
-    <param name="stop_navigation_service_name" value="/vva_navigation_correction/cancel_goal"/>  <!-- Service to call to stop navigation (cancel goal) -->
+    <param name="stop_moving_service_name" value="/vva_navigation_correction/cancel_goal"/>  <!-- Service to call to stop navigation (cancel goal) -->
 
     <param name="map_frame" value="map"/>
     
