@@ -73,9 +73,9 @@ class WebRobotManagement:
     # Parameters
     self.rate                        = rospy.get_param('~rate', 1)
     self.rtabmap_launchfile          = rospy.get_param('~rtabmap_launchfile',
-      "/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch")
+      "/home/david/VVA_ROS-AMR/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch")
     self.nav_consolidated_launchfile = rospy.get_param('~nav_consolidated_launchfile',
-      "/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_consolidated_nav.launch")
+      "/home/david/VVA_ROS-AMR/VVA_ws/src/vva_navigation/launch/vva_consolidated_nav.launch")
     self.isSimulation                  = rospy.get_param('~simulation', "false")
 
     # Global variables for subscribed topics

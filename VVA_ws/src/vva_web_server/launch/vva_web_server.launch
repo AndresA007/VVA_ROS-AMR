@@ -55,10 +55,10 @@
   <!-- 4. Start Web vva_robot_management -->
 
   <arg name="rtabmap_launch_file"
-    default="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch"
+    default="/home/david/VVA_ROS-AMR/VVA_ws/src/vva_navigation/launch/vva_rtabmap_simulation.launch"
   />
   <arg name="nav_consolidated_launch_file"
-    default="/home/theuser/AAData/Documents2/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_consolidated_nav.launch"
+    default="/home/david/VVA_ROS-AMR/VVA_ws/src/vva_navigation/launch/vva_consolidated_nav.launch"
   />
   <arg name="simulation"  default="false"/>
 

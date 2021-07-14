@@ -44,7 +44,7 @@ Consolidated launch file that includes nodes related to Odom Correction, Move Ba
   2. Start move_base
   ========================================================================================================
   -->
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log">
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <rosparam file="$(find vva_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find vva_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find vva_navigation)/config/local_costmap_params.yaml" command="load" />
@@ -111,7 +111,7 @@ Consolidated launch file that includes nodes related to Odom Correction, Move Ba
   ========================================================================================================
   Convert depth image from the Kinect to laser-scan to detect small obstacles
   -->
-	<node name="laserscan_kinect" pkg="laserscan_kinect" type	="laserscan_kinect" output="log">
+	<node name="laserscan_kinect" pkg="laserscan_kinect" type	="laserscan_kinect" output="screen">
       <!-- In -->
 <!--
       <remap from="image"       to="/synchronized/image"/>
@@ -163,7 +163,7 @@ Consolidated launch file that includes nodes related to Odom Correction, Move Ba
   a goal fails. For example, put an intermediate closer goal which is in the same path of the original goal
   to unstuck the robot
   -->
-  <node pkg="vva_navigation" type="vva_navigation_correction.py" name="vva_navigation_correction" output="log" >
+  <node pkg="vva_navigation" type="vva_navigation_correction.py" name="vva_navigation_correction" output="screen" >
     <!-- In -->
     <remap from="vva_navigation_simple/goal"   to="/vva_navigation_simple/goal"/>
     <remap from="move_base/GlobalPlanner/plan" to="/move_base/GlobalPlanner/plan"/>
