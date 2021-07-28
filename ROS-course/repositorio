@@ -1,0 +1,433 @@
+curso: https://www.dropbox.com/sh/u11kni9lsbww45b/AACBUFQJ65LP3VnX-4lx56kTa?dl=0
+
+
+******************************************************************************* PARTE 1 ********************************************************************
+
+PARTE 1 - Building a Simulated Model for Gazebo ... (https://www.dropbox.com/sh/u11kni9lsbww45b/AABe_3rKK0n4sNSUaQbjIzWya/%5BTutorial%5D%20Building%20a%20Simulated%20Model%20for%20Gazebo%20and%20ROS%20from%20Scratch%20%28part%201%29.mp4?dl=0)
+
+
+
+git clone -b base https://github.com/richardw05/mybot_ws.git
+
+
+catkin_make
+
+echo "source ~/VVA_ROS-AMR/ROS-course/mybot_ws/devel/setup.bash" >> ~/.bashrc2
+
+source ~/.bashrc2
+
+// ******************************************
+Salia error cuando ejecutaba:
+
+* $ roslaunch mybot_gazebo mybot_world.launch
+
+ERROR:
+RLException: Invalid <param> tag: Cannot load command parameter [robot_description]: no such command [['/opt/ros/noetic/share/xacro/xacro.py', '/home/david/VVA_ROS-AMR/ROS-course/mybot_ws/src/mybot_description/urdf/mybot.xacro']]. 
+
+Param xml is <param name="robot_description" command="$(find xacro)/xacro.py '$(find mybot_description)/urdf/mybot.xacro'"/>
+The traceback for the exception was written to the log file
+
+SOLUCIÓN:
+
+https://github.com/richardw05/mybot_ws/issues/4
+
+Cambiar en /VVA_ROS-AMR/ROS-course/mybot_ws/src/mybot_gazebo/launch$ sudo nano mybot_world.launch 
+
+linea 22 --> <param name="robot_description" command="$(find xacro)/xacro.py '$(find mybot_description)/urdf/mybot.xacro'"/>
+
+por --> <param name="robot_description" command="$(find xacro)/xacro '$(find mybot_description)/urdf/mybot.xacro'"/>
+
+Solo cambia lo de xacro.py a solo xacro
+
+
+Despues dar $ source ~/.bashrc2
+
+//**********************
+
+
+
+Dentro de Gazebo --> View --> Wireframe = Para ver la composicion del robot
+
+                 --> View --> Joints = 
+
+
+$ rostopic pub /cmd_vel geometry_msgs/Twist y se preciona TAB  --> Para ver linear y angular (xyz) --> cambiando el valor, el carro torna una acción: 
+
+ejemplo: 
+
+        "linear:
+          x: 0.2
+          y: 0.0
+          z: 0.0
+        angular:
+          x: 0.0
+          y: 0.0
+          z: 0.1" 
+
+
+ir para atras:
+
+        "linear:
+          x: -0.2   
+          y: 0.0
+          z: 0.0
+        angular:
+          x: 0.0
+          y: 0.0
+          z: 0.0" 
+
+
+Simulación y Realidad Hardware: 
+
+http://gazebosim.org/tutorials/?tut=ros_control
+
+
+//********************************************
+
+Salia error cuando ejecutaba:
+
+* $ roslaunch mybot_description mybot_rviz.launch
+
+
+ERROR:
+RLException: Invalid <param> tag: Cannot load command parameter [robot_description]: no such command [['/opt/ros/noetic/share/xacro/xacro.py', '/home/david/VVA_ROS-AMR/ROS-course/mybot_ws/src/mybot_description/urdf/mybot.xacro']]. 
+
+Param xml is <param name="robot_description" command="$(find xacro)/xacro.py '$(find mybot_description)/urdf/mybot.xacro'"/>
+The traceback for the exception was written to the log file
+
+
+Solucion:
+Cambiar en ~/VVA_ROS-AMR/ROS-course/mybot_ws/src/mybot_description/launch$ sudo nano mybot_rviz.launch 
+
+linea 4 --> <param name="robot_description" command="$(find xacro)/xacro.py '$(find mybot_description)/urdf/mybot.xacro'"/>
+
+por --> <param name="robot_description" command="$(find xacro)/xacro '$(find mybot_description)/urdf/mybot.xacro'"/>
+
+Solo cambia lo de xacro.py a solo xacro
+
+
+Despues dar $ source ~/.bashrc2
+
+//**********************
+
+Para que aparezca el robot en la ejecución de Rviz se le da en la parte inferior en "ADD" y se escoge RobotModel
+
+
+
+
+
+$ git clone -b base https://github.com/richardw05/mybot_ws.git
+
+
+$ ./run_gazebo.sh     --> abre gazebo
+
+$ ./run_cmd.sh        --> publishing and latching message
+
+$ ./run_rviz.sh       --> abre rviz
+
+
+
+
+$rqt_graph
+$rosrun tf view_frames
+$evince frames.pdf
+  
+
+
+
+
+
+******************************************************************************* ***** ********************************************************************
+
+
+
+
+
+******************************************************************************* PARTE 2 ********************************************************************
+PARTE 2 - Adding Sensors to the Gazebo Model(https://www.dropbox.com/sh/u11kni9lsbww45b/AAApCP31NfFI_CDw5cJ_l7LLa/%5BTutorial%5D%20Adding%20Sensors%20to%20the%20Gazebo%20Model%20%28part%202%29.mp4?dl=0)
+
+
+
+https://github.com/richardw05/mybot_ws/blob/base_sensors/src/mybot_description/urdf/mybot.xacro
+
+
+
+*Propiedades y uso camara.
+
+En $ rostopic list --> podemos ver la camara que se esta utilizando:
+
+/mybot/camera1/camera_info
+/mybot/camera1/image_raw
+/mybot/camera1/image_raw/compressed
+/mybot/camera1/image_raw/compressed/parameter_descriptions
+/mybot/camera1/image_raw/compressed/parameter_updates
+/mybot/camera1/image_raw/compressedDepth
+/mybot/camera1/image_raw/compressedDepth/parameter_descriptions
+/mybot/camera1/image_raw/compressedDepth/parameter_updates
+/mybot/camera1/image_raw/theora
+/mybot/camera1/image_raw/theora/parameter_descriptions
+/mybot/camera1/image_raw/theora/parameter_updates
+/mybot/camera1/parameter_descriptions
+/mybot/camera1/parameter_updates
+
+
+
+Para ver lo que ve la camara de forma externa:                    ---> Toca tener Gazebo iniciado
+$ rosrun image_view image_view image:=/mybot/camera1/image_raw
+
+
+Tambien se muestra como en Rviz se puede ver la camara
+
+
+*Hokuyo Laser.
+
+en # mybot_ws/src/mybot_description/urdf/mybot.gazebo
+
+<!-- hokuyo -->
+  <gazebo reference="hokuyo">
+    <sensor type="gpu_ray" name="head_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>                         ---> Se puede activar o desactivar el Laser (true - false)
+
+
+
+Tambien se puede activar Laser Scan en rviz.
+
+
+www.gazebosim.org/tutorials?tut=ros_gzplugins
+
+www.wiki.ros.org/navigation/Tutorials/RobotSetup
+
+
+
+******************************************************************************* ***** ********************************************************************
+
+
+******************************************************************************* PARTE 3 ********************************************************************
+
+PARTE 3 - Autonomous Navigation with the ROS Na… (https://www.dropbox.com/sh/u11kni9lsbww45b/AABGVnGmnA9GtoWuMSx5p3Koa/%5BTutorial%5D%20Autonomous%20Navigation%20with%20the%20ROS%20Navigation%20Stack%20%28part%203%29.mp4?dl=0)
+
+Mappeo y la navegación (Pose Estimate  &&  Nav Goal   --- opciones en RVIZ)
+
+www.learn.turtlebot.com/2015/02/03/8/     -->  CREAR MAPA  --> es una de las paginas que muestra el video 3 pero esta desactualizado, mejor usar la guia para la inicialización del repositorio:
+
+https://github.com/richardw05/mybot_ws/tree/navigation
+
+
+Reemplazamos mybot.gazebo y mybot.xacro de este repositorio en la ruta /.../mybot_ws/src/mybot_description/urdf   a nuestro ros con esta misma ruta
+
+Despues creamos la carpeta mybot_navigation: ~/mybot_ws/src$ catkin_create_pkg mybot_navigation
+
+y despues creamos la carpeta dentro de mybot_navigation launch, y copiamos del repositorio en esa misma ruta mybot_slam.launch.
+
+
+En el terminal ponemos $ roscd turtlebot3_navigation/  --> podemos ver los diferentes archivos para turtlebot3
+
+
+En la ruta /mybot_ws/src/mybot_gazebo/worlds$  ---> pegamos el archivo  turtlebot_playground.world que esta en esa misma ruta del repositorio.
+
+Reemplazamos y copiamos los archivos del mybot_gazebo de la carpeta launch y worlds.
+
+
+
+*First, install the turtlebot3 packages:
+
+sudo apt install ros-noetic-turtlebot3_/*
+sudo apt install ros-noetic-slam-gmapping ros-noetic-gmapping ros-noetic-openslam-gmapping
+
+
+
+Me salio error cuando: $ roslaunch mybot_gazebo turtlebot3_world.launch gui:=false
+
+Resource not found: The following package was not found in <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>: turtlebot3_gazebo
+ROS path [0]=/opt/ros/noetic/share/ros
+ROS path [1]=/home/david/VVA_ROS-AMR/ROS-course/mybot_ws/src
+ROS path [2]=/home/david/VVA_ROS-AMR/VVA_ws/src
+ROS path [3]=/home/david/VVA_ROS-AMR/ROSCompiledPackages_ws/src
+ROS path [4]=/opt/ros/noetic/share
+The traceback for the exception was written to the log file
+
+SOLUCION:
+https://answers.ros.org/question/348299/error-in-roslaunch-turtlebot3_gazebo-turtlebot3_worldlaunch/
+$ sudo apt-get install ros-noetic-turtlebot3-gazebo
+
+
+
+
+**Los comando usados para iniciar el servicio: (permitiendo mover el vehiculo con los botones a-w-s-d-x (s para parar el vehiculo), para la exploración y mappeo del mismo).
+
+.start up gazebo
+
+$ export TURTLEBOT3_MODEL="waffle"
+$ roslaunch mybot_gazebo turtlebot3_world.launch gui:=false
+
+.start map building (also starts rviz)
+
+$ export TURTLEBOT3_MODEL="waffle"
+$ roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping
+
+.start teleop
+
+$ export TURTLEBOT3_MODEL=waffle
+$ roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
+
+
+**Para guardar el mapa:
+$ rosrun map_server map_saver -f /tmp/test_map
+
+Despues cerrar todos los terminales
+
+**Cargando el mapa
+Ahora, usaremos el mapa creado para localizar mientras nos movemos. Una vez cargado, usaremos rviz para establecer puntos de navegación y el robot debería moverse de forma autónoma.
+
+Install local planner (if needed)
+$ sudo apt install ros-noetic-dwa-local-planner
+
+In Terminal 1, launch the Gazebo world
+$ roslaunch mybot_gazebo turtlebot3_world.launch
+
+In Terminal 2, start map building (will start rviz too)
+$roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/tmp/test_map.yaml
+
+In rviz, estimate initial pose - click 2D Pose Estimate and click the approximate location of the robot on the map, and drag to indicate the direction.
+
+n Terminal 3, start teleop and move the robot around. The estimated positions should converge on the true position pretty quickly.
+$ roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
+
+In rviz, send a few 2D Navigation Goals (click on `2D Nav Goal and click/drag to set position/orientation) and watch the robot autonomously navigate to the goal.
+
+
+
+
+
+*PROBLEMAS ENCONTRADOS CON EL VIDEO 3(https://www.dropbox.com/sh/u11kni9lsbww45b/AABGVnGmnA9GtoWuMSx5p3Koa/%5BTutorial%5D%20Autonomous%20Navigation%20with%20the%20ROS%20Navigation%20Stack%20%28part%203%29.mp4?dl=0):
+
+Los archivos estan desactualizados, toca guiarse por los archivos nuevos del repositorio https://github.com/richardw05/mybot_ws/tree/navigation,
+el mismo repositorio trae la guia para iniciar el servicio de navegacion y guardar el mapa, seguir esta guia, en la inicialización del servicio. 
+
+
+******************************************************************************* ***** ********************************************************************
+
+
+******************************************************************************* PARTE 4 ********************************************************************
+
+PARTE 4 - Open-loop Control of a Hardware Robot (https://www.dropbox.com/sh/u11kni9lsbww45b/AAD5xt5Cgg95Pysn7yo9ZwKGa/%5BTutorial%5D%20Open-loop%20Control%20of%20a%20Hardware%20Robot%20in%20ROS%20%28part%204%29.mp4?dl=0)
+
+Controller.
+
+
+
+
+
+
+
+******************************************************************************* ***** ********************************************************************
+
+
+******************************************************************************* PARTE 5 ********************************************************************
+   
+PARTE 5 -  Closed-loop Control of a Hardware Robot…  (https://www.dropbox.com/sh/u11kni9lsbww45b/AAA1cFCiC-AU_lvJKdaDxJt9a/%5BTutorial%5D%20Closed-loop%20Control%20of%20a%20Hardware%20Robot%20in%20ROS%20%28part%205%29.mp4?dl=0)
+
+
+https://github.com/richardw05/gopigo_ws
+
+min 8 --> Odometry In Simulation
+
+*In gopigo_interface.launch, set the following for all:
+
+en src/nav_behaviors/launch/nav_behaviors.launch agregar la siguiente linea:
+
+ <param name="gopigo_on" value="False" />
+
+
+*Prueba:
+
+Now run the launch files. On the host machine:
+$ roslaunch nav_behaviors nav_behaviors.launch
+
+On the Raspberry PI:
+$ roslaunch gopigo_description gopigo_interface.launch
+
+
+rostopic echo /cmd_vel
+rostopic echo /lwheel_tangent_vel_target
+rostopic echo /rwheel_tangent_vel_target
+rostopic echo /lwheel_angular_vel_target
+rostopic echo /rwheel_angular_vel_target
+rostopic echo /lwheel_angular_vel_control
+rostopic echo /rwheel_angular_vel_control
+rostopic echo /lwheel_angular_vel_motor
+rostopic echo /rwheel_angular_vel_motor
+
+rostopic echo /lwheel_angular_vel_enc
+rostopic echo /rwheel_angular_vel_enc
+rostopic echo /lwheel_tangent_vel_enc
+rostopic echo /rwheel_tangent_vel_enc
+rostopic echo /cmd_vel_enc
+
+
+Send target /cmd_vel messages and see how the messages change.
+
+./nav_forward.sh
+./nav_rotate.sh
+
+
+
+
+
+******************************************************************************* ***** *****************************
+
+
+fricaz para hacer los modelos
+
+
+
+MicroRos  --> para correr micro controladoras
+
+
+
+
+Optimización de navegación
+https://wiki.ros.org/navigation/Tutorials/Navigation%20Tuning%20Guide
+
+
+
+
+
+dynamic reconfigure en ROS
+
+
+
+
+
+
+
+
+*amcl es un sistema de localización probabilística para un robot que se mueve en 2D. Implementa el enfoque de localización de Monte Carlo adaptativo (o muestreo KLD) (como lo describe Dieter Fox), que utiliza un filtro de partículas para rastrear la pose de un robot contra un mapa conocido.
+
+amcl toma un mapa basado en láser, escaneos láser y mensajes de transformación, y genera estimaciones de pose. Al inicio, amcl inicializa su filtro de partículas de acuerdo con los parámetros proporcionados. Tenga en cuenta que, debido a los valores predeterminados, si no se establecen parámetros, el estado del filtro inicial será una nube de partículas de tamaño moderado centrada alrededor de (0,0,0).
+
+
+*gmapping
+Este paquete contiene un contenedor ROS para Gmapping de OpenSlam. El paquete gmapping proporciona SLAM (localización y mapeo simultáneos) basado en láser, como un nodo ROS llamado slam_gmapping. Con slam_gmapping, puede crear un mapa de cuadrícula de ocupación 2-D (como el plano de un edificio) a partir de datos láser y de pose recopilados por un robot móvil.
+
+
+
+*tf tiene una actualizacion que es tf2 siendo mas eficiente
+
+tf es un paquete que permite al usuario realizar un seguimiento de múltiples marcos de coordenadas a lo largo del tiempo. tf mantiene la relación entre los marcos de coordenadas en una estructura de árbol almacenada en el tiempo y permite al usuario transformar puntos, vectores, etc. entre dos marcos de coordenadas en cualquier momento deseado.
+
+tf2 puede operar en un sistema distribuido . Esto significa que toda la información sobre los marcos de coordenadas de un robot está disponible para todos los componentes ROS en cualquier computadora del sistema. Tf2 puede operar con un servidor central que contiene toda la información de transformación, o puede hacer que cada componente de su sistema distribuido cree su propia base de datos de información de transformación.
+
+
+*DUDA:
+Si esta en modo navegación como ezquiva objetos que no estaban en el mappeo.
+
+
+
+
+
+
+
+
+
