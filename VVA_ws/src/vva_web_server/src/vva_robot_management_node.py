@@ -46,9 +46,10 @@ import os
 import roslaunch
 
 # status topic constants
-IDLE        = 0
+IDLE1       = 0  # Before mapping
 MAPPING     = 1
 NAVIGATING  = 2
+IDLE2       = 3  # After mapping
 
 # In charge of managing the ROS system based on communication with the FrontEnd.
 # Launches and closes rtabmap launchfiles.
@@ -82,7 +83,7 @@ class WebRobotManagement:
     # self.goal_status = actionlib.GoalStatus.ACTIVE
 
     # State
-    self.currentStatus            = IDLE
+    self.currentStatus            = IDLE1
     self.pendingToStartMapping    = False
     self.pendingToStopMapping     = False
     self.pendingToStartNavigation = False
@@ -157,7 +158,7 @@ class WebRobotManagement:
       self.rtabmap_launch_parent.shutdown()
 
       # Update the state
-      self.currentStatus = IDLE
+      self.currentStatus = IDLE2
       self.pendingToStopMapping = False
 
       rospy.loginfo("vva_robot_management: mapping (rtabmap) stopped.")
@@ -209,7 +210,7 @@ class WebRobotManagement:
       self.rtabmap_launch_parent.shutdown()
 
       # Update the state
-      self.currentStatus = IDLE
+      self.currentStatus = IDLE2
       self.pendingToStopNavigation = False
 
       rospy.loginfo("vva_robot_management: navigation (rtabmap) stopped.")
@@ -233,9 +234,13 @@ class WebRobotManagement:
       # Put here any logic to be executed before publishing the state
       self.status_pub.publish(NAVIGATING)
 
-    elif self.currentStatus == IDLE:
+    elif self.currentStatus == IDLE1:
       # Put here any logic to be executed before publishing the state
-      self.status_pub.publish(IDLE)
+      self.status_pub.publish(IDLE1)
+
+    elif self.currentStatus == IDLE2:
+      # Put here any logic to be executed before publishing the state
+      self.status_pub.publish(IDLE2)
 
 
 

@@ -484,7 +484,10 @@ VehiculoVigilanciaAutonomo_v0.6.2:
              npm start
 
           # In the J-Nano: Start the modules to integrate with the Web client: rosbridge_server, web_video_server, robot_pose_publisher and vva_robot_management:
-             roslaunch vva_web_server vva_web_server.launch rtabmap_launch_file:="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_hw.launch"
+             roslaunch vva_web_server vva_web_server.launch \
+                rtabmap_launch_file:="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_rtabmap_hw.launch" \
+                nav_consolidated_launch_file:="/home/ubuntu/ROS/VehiculoVigilanciaAutonomo/VVA_ws/src/vva_navigation/launch/vva_consolidated_nav.launch" \
+                simulation:=false
           # In the J-Nano: Update the /dev/ttyUSB? number. Start the modules: vva_base_controller, kinect, kinect_aux, rplidar and state_publishers:
              roslaunch vva_jnano_consolidated vva_jnano_lowlevel_consolidated.launch arduino_port:=/dev/ttyUSB? rplidar_port:=/dev/ttyUSB?
           # In the J-Nano: Start the odometry based on laserscan:
@@ -504,21 +507,23 @@ VehiculoVigilanciaAutonomo_v0.6.2:
           # Localization:
           # -------------------------------------------------------------------------------------------------------
 
-          # In the J-Nano: -- PENDING TO MIGRATE - MANAGED FROM vva_robot_management_node.py --  Start the rtabmap, in localization mode:
+          # MIGRADO --- In the J-Nano: MANAGED FROM vva_robot_management_node.py --  Start the rtabmap, in localization mode:
              roslaunch vva_navigation vva_rtabmap_hw.launch localization:=true
-
-          # In the J-Nano: Start the modules: vva_odom_correction, move_base, vva_cliff_detector, laserscan_kinect and vva_navigation_correction:
+          # MIGRADO --- In the J-Nano: Start the modules: vva_odom_correction, move_base, vva_cliff_detector, laserscan_kinect and vva_navigation_correction:
              roslaunch vva_navigation vva_consolidated_nav.launch simulation:=false
+
+
           # In the J-Nano: Update the location coordinates in navigation_intent_params.yaml and launch the navigation-intent node:
              roslaunch vva_user_intents vva_user_intents.launch simulation:=false
-
-          # In the J-Nano: Start the DeepSpeech module:
-             $ROS_HOME_WS/VehiculoVigilanciaAutonomo_v0.6.1/DeepSpeechModule/run_DS_module_jnano.sh
-          # In the J-Nano: Start the Voice Interaction Speech Recognition module:
-             roslaunch vva_voice_interact_server vva_voice_interact_server.launch
-
           # In the J-Nano: Start the Robot Health Check module:
              roslaunch vva_robot_healthcheck vva_robot_healthcheck.launch
+
+
+          # NO APLICA --- In the J-Nano: Start the DeepSpeech module:
+             $ROS_HOME_WS/VehiculoVigilanciaAutonomo_v0.6.1/DeepSpeechModule/run_DS_module_jnano.sh
+          # NO APLICA --- In the J-Nano: Start the Voice Interaction Speech Recognition module:
+             roslaunch vva_voice_interact_server vva_voice_interact_server.launch
+
 
 
      - Commands to test it in the hardware using background execution:
