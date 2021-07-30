@@ -183,7 +183,7 @@ Consolidated launch file that includes nodes related to Odom Correction, Move Ba
                                                                                    
     <param name="stop_lidar_service_name"     value="/stop_motor"/>  <!-- Service to call to stop the motor of RPLidar -->
     <param name="start_lidar_service_name"    value="/start_motor"/>  <!-- Service to call to start the motor of RPLidar -->
-    <param name="rplidar_idle_time"          value="15"/>  <!-- Time before stopping the RPLidar's motor when in idle state -->
+    <param name="rplidar_idle_time"          value="120"/>  <!-- Time before stopping the RPLidar's motor when in idle state -->
     
     <param if="$(arg simulation)"     name="use_odom_correction_status" value="false"/>
     <param unless="$(arg simulation)" name="use_odom_correction_status" value="true"/>  <!-- If set to true, vva_navigation_correction will
