@@ -48,6 +48,12 @@ from vva_msgs.msg import OdomCorrectionStatus
 from vva_msgs.msg import NavCorrectionStatus
 
 
+import dynamic_reconfigure.client   #
+
+from sensor_msgs.msg import LaserScan ##
+import numpy
+
+msgLidarScan = 'valor'
 
 # Intermediate module between a goal client and move_base, in charge of implementing improvement actions when
 # a goal fails. For example, put an intermediate closer goal which is in the same path of the original goal
@@ -60,12 +66,18 @@ class NavigationCorrection:
     self.simple_goal_sub =  rospy.Subscriber('vva_navigation_simple/goal', PoseStamped, self.simple_goal_callback)
     self.global_path_sub =  rospy.Subscriber('move_base/GlobalPlanner/plan',  Path, self.global_path_callback)
     self.odom_c_status_sub =  rospy.Subscriber('vva_odom_correction/status',  OdomCorrectionStatus, self.odom_c_status_callback)
+    #
+    self.lidarScan_sub =  rospy.Subscriber('/rplidar_scan',  LaserScan, self.laserscan_callback)
     
+
     # Published topics
     self.nav_corr_status_pub = rospy.Publisher('vva_navigation_correction/status', NavCorrectionStatus, queue_size=10)
     
     # Published services
     self.cancel_goal_srv     = rospy.Service('~cancel_goal', Empty, self.cancel_goal_srv_callback)
+    self.change_param_srv    = rospy.Service('~change_param', Empty, self.change_param_srv_callback)
+    
+      #++++++++++++++++++++
 
     # Parameters
     self.rate                        = rospy.get_param('~rate', 10)
@@ -80,6 +92,7 @@ class NavigationCorrection:
     # Global variables for subscribed topics
     self.original_simple_goal = None  # Type: geometry_msgs/PoseStamped
     self.global_path = None           # Type: geometry_msgs/PoseStamped[]
+    self.lidarScan_value = None
     self.odom_c_status = OdomCorrectionStatus.BUSY
     
     # Other global variables
@@ -103,6 +116,80 @@ class NavigationCorrection:
 
   def odom_c_status_callback(self,msg):
     self.odom_c_status = msg.status
+  
+  def change_param_srv_callback(self,req):
+     client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
+     params = {'inflation_radius' : 0.55}
+     config = client.update_configuration(params)
+     rospy.loginfo("************************************************************************")
+     
+     vLS = self.lidarScan_value.ranges
+     #rospy.loginfo(self.lidarScan_value.ranges)
+     rospy.loginfo(vLS)
+     rospy.loginfo("Tamaño: ")
+     tamV = len(self.lidarScan_value.ranges) #Promedio, con el promedio comenzar a probar para acomodar la inflation
+     rospy.loginfo(tamV)
+
+     #max 
+     maxV = self.lidarScan_value.range_max
+
+     
+     inf = float('inf')
+
+     valor = vLS.count(inf)
+     rospy.loginfo("# VECES QUE SE REPITE inf: ")
+     rospy.loginfo(valor)
+
+     cont = 0
+     #vN = [1]*tamV
+     vN = [0]*tamV
+
+     #vN = vLS
+
+     while cont < tamV:
+
+       #vN.append(vLS[cont])
+
+       #vLS = vLS.remove(inf)
+       if vLS[cont] == inf:
+          vN[cont] = maxV
+          #rospy.loginfo(maxV)
+       else:
+          vN.append(vLS[cont])
+         # vN[cont] = vLS[cont]
+
+       cont += 1
+    
+     cont = 0 
+     cont2 = 0
+
+     tvN = len(vN)
+
+     #Se usa porque genera un vector de 572, llenando en cero el resto de campos diferentes de los 300
+     while cont < tvN:
+
+        if vN[cont] != 0:
+
+          cont2 += 1
+
+        cont += 1
+
+     promedio = sum(vN)/cont2
+     rospy.loginfo("Promedio: ")
+     rospy.loginfo(promedio)
+     rospy.loginfo("Tamaño: ")
+     rospy.loginfo(len(vN))
+     #rospy.loginfo(vN)
+     rospy.loginfo(cont2)
+     return []
+
+     
+          #++++++++++++++++++++
+  
+  def laserscan_callback(self,msg):
+     self.lidarScan_value = msg
+     
+
     
   def cancel_goal_srv_callback(self,req):
     # If goal is in progress in the move_base ActionServer
@@ -115,8 +202,7 @@ class NavigationCorrection:
       self.cancel_goal_pending_to_attend = True
     return []
     
-    
-    
+
     
   # ==================================================
   # Update function
@@ -146,6 +232,83 @@ class NavigationCorrection:
       goal_status_message.status = self.nav_corr_status
       self.nav_corr_status_pub.publish(goal_status_message)
       
+      #-----------------------------
+      #-----------------------------
+
+      vLS = self.lidarScan_value.ranges
+      rospy.loginfo(vLS)
+      rospy.loginfo("Tamaño: ")
+      tamV = len(self.lidarScan_value.ranges) #Promedio, con el promedio comenzar a probar para acomodar la inflation
+      rospy.loginfo(tamV)
+
+      #max 
+      maxV = self.lidarScan_value.range_max
+
+      inf = float('inf')
+
+      valor = vLS.count(inf)
+      rospy.loginfo("# VECES QUE SE REPITE inf: ")
+      rospy.loginfo(valor)
+
+      cont = 0
+      vN = [0]*tamV
+
+      while cont < tamV:
+
+        if vLS[cont] == inf:
+            vN[cont] = maxV
+        else:
+            vN.append(vLS[cont])
+
+        cont += 1
+      
+      cont = 0 
+      cont2 = 0
+
+      tvN = len(vN)
+
+      #Se usa porque genera un vector de 572, llenando en cero el resto de campos diferentes de los 300
+      while cont < tvN:
+
+          if vN[cont] != 0:
+
+            cont2 += 1
+
+          cont += 1
+
+      promedio = sum(vN)/cont2
+      rospy.loginfo("Promedio: ")
+      rospy.loginfo(promedio)
+      rospy.loginfo("Tamaño: ")
+      rospy.loginfo(len(vN))
+      rospy.loginfo(cont2)
+
+      if promedio < 2.11:
+
+        client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
+        params = {'inflation_radius' : 0.2}
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+      
+        client= dynamic_reconfigure.client.Client('/move_base/TrajectoryPlannerROS')
+        params = {'max_vel_x' : 0.1}
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+      
+      else:
+        client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
+        params = {'inflation_radius' : 0.55}
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+ 
+        client= dynamic_reconfigure.client.Client('/move_base/TrajectoryPlannerROS')
+        params = {'max_vel_x' : 0.8} #0.93
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+      
+      #-----------------------------
+      #-----------------------------
+      
       # If RPLidar is stopped, start it
       if self.is_rplidar_stopped and self.using_hw_rplidar:
         # Start the RPLidar motor
@@ -159,6 +322,19 @@ class NavigationCorrection:
         except rospy.ServiceException as e:
           rospy.logwarn("vva_navigation_correction: Service failed: " + str(e))
       
+      #
+          #rospy.loginfo(self.lidarScan_sub)
+        
+        #-------------------------
+
+
+        
+
+
+
+        #-------------------------
+      #
+
       rospy.loginfo("vva_navigation_correction: Sending originally requested goal to move_base...")
       goal_result = self.send_simple_goal(self.original_simple_goal)
 
@@ -225,7 +401,6 @@ class NavigationCorrection:
     goal_status_message.header.stamp = rospy.Time.now()
     goal_status_message.status = self.nav_corr_status
     self.nav_corr_status_pub.publish(goal_status_message)
-
 
 
   # ==================================================
@@ -299,6 +474,12 @@ class NavigationCorrection:
     rospy.loginfo("vva_navigation_correction: Start")
     rate = rospy.Rate(self.rate)
     rospy.on_shutdown(self.shutdown)
+
+    #element = dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
+    #params = {'inflation_radius': 1.6}
+    #config = element.update_configuration(params)
+    #rospy.loginfo("************************************************************************")
+
     
     # Initialize the ActionClient for move_base
     self.move_base_action_client = actionlib.SimpleActionClient('move_base', move_base_msgs.msg.MoveBaseAction)

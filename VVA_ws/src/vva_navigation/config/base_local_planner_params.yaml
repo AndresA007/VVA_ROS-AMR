@@ -19,7 +19,7 @@ TrajectoryPlannerROS:
   xy_goal_tolerance: 0.3  # 0.10
 
   # Forward Simulation Parameters
-  sim_time: 3.0          # 1.0   It must fulfill: (sim_time * min_vel_x)  <  (2 * xy_goal_tolerance)
+  sim_time: 3.0 #3.0         # 1.0   It must fulfill: (sim_time * min_vel_x)  <  (2 * xy_goal_tolerance)
   vx_samples: 20         # 3
   vtheta_samples: 60     # 20
   

@@ -26,7 +26,7 @@ local_costmap:
   ##############
     # (https://wiki.ros.org/costmap_2d/hydro/inflation)
     enabled:              true
-    cost_scaling_factor:  10.0  # exponential rate at which the obstacle cost drops off (default: 10)
+    cost_scaling_factor:  5.0 #10.0  # exponential rate at which the obstacle cost drops off (default: 10)
     inflation_radius:     0.65  # max. distance from an obstacle at which costs are incurred for planning paths.
 
 
