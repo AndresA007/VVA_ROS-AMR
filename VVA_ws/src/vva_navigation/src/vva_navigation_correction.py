@@ -117,74 +117,12 @@ class NavigationCorrection:
   def odom_c_status_callback(self,msg):
     self.odom_c_status = msg.status
   
-  def change_param_srv_callback(self,req):
-     client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
-     params = {'inflation_radius' : 0.55}
-     config = client.update_configuration(params)
-     rospy.loginfo("************************************************************************")
+  def change_param_srv_callback(self,req): # --------- 
      
-     vLS = self.lidarScan_value.ranges
-     #rospy.loginfo(self.lidarScan_value.ranges)
-     rospy.loginfo(vLS)
-     rospy.loginfo("Tamaño: ")
-     tamV = len(self.lidarScan_value.ranges) #Promedio, con el promedio comenzar a probar para acomodar la inflation
-     rospy.loginfo(tamV)
-
-     #max 
-     maxV = self.lidarScan_value.range_max
-
-     
-     inf = float('inf')
-
-     valor = vLS.count(inf)
-     rospy.loginfo("# VECES QUE SE REPITE inf: ")
-     rospy.loginfo(valor)
-
-     cont = 0
-     #vN = [1]*tamV
-     vN = [0]*tamV
-
-     #vN = vLS
-
-     while cont < tamV:
-
-       #vN.append(vLS[cont])
-
-       #vLS = vLS.remove(inf)
-       if vLS[cont] == inf:
-          vN[cont] = maxV
-          #rospy.loginfo(maxV)
-       else:
-          vN.append(vLS[cont])
-         # vN[cont] = vLS[cont]
-
-       cont += 1
-    
-     cont = 0 
-     cont2 = 0
-
-     tvN = len(vN)
-
-     #Se usa porque genera un vector de 572, llenando en cero el resto de campos diferentes de los 300
-     while cont < tvN:
-
-        if vN[cont] != 0:
-
-          cont2 += 1
-
-        cont += 1
-
-     promedio = sum(vN)/cont2
-     rospy.loginfo("Promedio: ")
-     rospy.loginfo(promedio)
-     rospy.loginfo("Tamaño: ")
-     rospy.loginfo(len(vN))
-     #rospy.loginfo(vN)
-     rospy.loginfo(cont2)
      return []
 
      
-          #++++++++++++++++++++
+          
   
   def laserscan_callback(self,msg):
      self.lidarScan_value = msg
@@ -202,7 +140,95 @@ class NavigationCorrection:
       self.cancel_goal_pending_to_attend = True
     return []
     
+  # ==================================================
+  # Extra function
+  # ==================================================
+  def dynamic_reconfigure_params(self):
 
+      vLS = self.lidarScan_value.ranges
+      rospy.loginfo(vLS)
+      rospy.loginfo("Tamano: ")
+      tamV = len(self.lidarScan_value.ranges) #Promedio, con el promedio comenzar a probar para acomodar la inflation
+      rospy.loginfo(tamV)
+
+      #max 
+      maxV = self.lidarScan_value.range_max
+
+      inf = float('inf')
+
+      valor = vLS.count(inf)
+      rospy.loginfo("# VECES QUE SE REPITE inf: ")
+      rospy.loginfo(valor)
+
+      obsm = 200
+      cont = 0
+      vN = [0]*tamV
+
+      while cont < tamV:
+
+        if vLS[cont] == inf:
+            vN[cont] = maxV
+        else:
+            vN.append(vLS[cont])
+
+            #Obstaculo mas cercano - menor valor 
+            if vLS[cont] != 0:
+                if vLS[cont] < obsm:
+                    obsm = vLS[cont]
+                    
+        cont += 1
+      
+
+      rospy.loginfo("------- OBSTACULO MAS PEQUEÑO:")
+      rospy.loginfo(obsm)
+
+      cont = 0 
+      cont2 = 0
+
+      tvN = len(vN)
+
+      #Se usa porque genera un vector de 572, llenando en cero el resto de campos diferentes de los 300
+      while cont < tvN:
+
+          if vN[cont] != 0:
+
+            cont2 += 1
+
+          cont += 1
+
+      promedio = sum(vN)/cont2
+      rospy.loginfo("Promedio: ")
+      rospy.loginfo(promedio)
+      rospy.loginfo("Tamano: ")
+      rospy.loginfo(len(vN))
+      rospy.loginfo(cont2)
+
+      if promedio < 2.11 or obsm < 0.5:   #obsm < 0.65
+
+        client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
+        params = {'inflation_radius' : 0.2}
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+      
+        client= dynamic_reconfigure.client.Client('/move_base/TrajectoryPlannerROS')
+        params = {'max_vel_x' : 0.1}
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+      
+      else:
+        client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
+        params = {'inflation_radius' : 0.55}
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+ 
+        client= dynamic_reconfigure.client.Client('/move_base/TrajectoryPlannerROS')
+        params = {'max_vel_x' : 0.8} #0.93
+        config = client.update_configuration(params)
+        rospy.loginfo("************************************************************************")
+      
+
+
+      return []
     
   # ==================================================
   # Update function
@@ -232,82 +258,11 @@ class NavigationCorrection:
       goal_status_message.status = self.nav_corr_status
       self.nav_corr_status_pub.publish(goal_status_message)
       
+     
       #-----------------------------
+      self.dynamic_reconfigure_params()
       #-----------------------------
-
-      vLS = self.lidarScan_value.ranges
-      rospy.loginfo(vLS)
-      rospy.loginfo("Tamaño: ")
-      tamV = len(self.lidarScan_value.ranges) #Promedio, con el promedio comenzar a probar para acomodar la inflation
-      rospy.loginfo(tamV)
-
-      #max 
-      maxV = self.lidarScan_value.range_max
-
-      inf = float('inf')
-
-      valor = vLS.count(inf)
-      rospy.loginfo("# VECES QUE SE REPITE inf: ")
-      rospy.loginfo(valor)
-
-      cont = 0
-      vN = [0]*tamV
-
-      while cont < tamV:
-
-        if vLS[cont] == inf:
-            vN[cont] = maxV
-        else:
-            vN.append(vLS[cont])
-
-        cont += 1
-      
-      cont = 0 
-      cont2 = 0
-
-      tvN = len(vN)
-
-      #Se usa porque genera un vector de 572, llenando en cero el resto de campos diferentes de los 300
-      while cont < tvN:
-
-          if vN[cont] != 0:
-
-            cont2 += 1
-
-          cont += 1
-
-      promedio = sum(vN)/cont2
-      rospy.loginfo("Promedio: ")
-      rospy.loginfo(promedio)
-      rospy.loginfo("Tamaño: ")
-      rospy.loginfo(len(vN))
-      rospy.loginfo(cont2)
-
-      if promedio < 2.11:
-
-        client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
-        params = {'inflation_radius' : 0.2}
-        config = client.update_configuration(params)
-        rospy.loginfo("************************************************************************")
-      
-        client= dynamic_reconfigure.client.Client('/move_base/TrajectoryPlannerROS')
-        params = {'max_vel_x' : 0.1}
-        config = client.update_configuration(params)
-        rospy.loginfo("************************************************************************")
-      
-      else:
-        client= dynamic_reconfigure.client.Client('/move_base/local_costmap/local_inflation_layer')
-        params = {'inflation_radius' : 0.55}
-        config = client.update_configuration(params)
-        rospy.loginfo("************************************************************************")
- 
-        client= dynamic_reconfigure.client.Client('/move_base/TrajectoryPlannerROS')
-        params = {'max_vel_x' : 0.8} #0.93
-        config = client.update_configuration(params)
-        rospy.loginfo("************************************************************************")
-      
-      #-----------------------------
-      #-----------------------------
+     
       
       # If RPLidar is stopped, start it
       if self.is_rplidar_stopped and self.using_hw_rplidar:
@@ -322,19 +277,6 @@ class NavigationCorrection:
         except rospy.ServiceException as e:
           rospy.logwarn("vva_navigation_correction: Service failed: " + str(e))
       
-      #
-          #rospy.loginfo(self.lidarScan_sub)
-        
-        #-------------------------
-
-
-        
-
-
-
-        #-------------------------
-      #
-
       rospy.loginfo("vva_navigation_correction: Sending originally requested goal to move_base...")
       goal_result = self.send_simple_goal(self.original_simple_goal)
 
@@ -354,6 +296,12 @@ class NavigationCorrection:
           
           # Publish status
           self.nav_corr_status_pub.publish(goal_status_message)
+
+
+          #----------------------------
+          self.dynamic_reconfigure_params()
+          #----------------------------
+
 
           # Send a closer goal
           closer_goal = self.global_path[self.closer_goal_path_poses]
