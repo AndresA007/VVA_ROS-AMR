@@ -179,7 +179,7 @@ class NavigationCorrection:
         cont += 1
       
 
-      rospy.loginfo("------- OBSTACULO MAS PEQUEÑO:")
+      rospy.loginfo("------- OBSTACULO MAS PEQUENO:")
       rospy.loginfo(obsm)
 
       cont = 0 

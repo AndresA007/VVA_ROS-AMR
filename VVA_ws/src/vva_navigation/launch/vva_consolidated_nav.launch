@@ -190,7 +190,20 @@ Consolidated launch file that includes nodes related to Odom Correction, Move Ba
                                                                                              wait for vva_odom_correction node to finish the
                                                                                              odometry restart procedures before sending the
                                                                                              goal to move_base -->
-  </node>  
+  </node> 
+
+ <!--
+  ========================================================================================================
+  7. Start vva_navigation_correction
+  ========================================================================================================
+  -->
+  <node pkg="vva_navigation" type="vva_dynamic_reconfigure_params.py" name="vva_dynamic_reconfigure_params" output="screen" >
+   
+   <!-- Out -->
+   <param name="rate"                   value="$(arg rate)"/>  <!-- Execution rate of the node (Hz) -->
+  
+  
+  </node> 
 
 </launch>
 
