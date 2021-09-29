@@ -36,6 +36,18 @@
     <param name="timeout_idle" value="50" />  <!-- cmd_vel messages will be ignored if they take longer than this time to be processed -->
   </node>
 
+  <!--
+  ========================================================================================================
+  2. Start vva_base_odometry_wheels_encoders
+  ========================================================================================================
+  -->
+  <node pkg="vva_base_controller" type="vva_base_odometry_wheels_encoders.py" name="vva_base_odometry_wheels_encoders" output="screen" >
+   
+   <!-- Out -->
+   
+  
+  </node> 
+
 </launch>
 
 

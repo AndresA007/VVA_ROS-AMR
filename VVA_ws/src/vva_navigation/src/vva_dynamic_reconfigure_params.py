@@ -150,6 +150,7 @@ class VVADynamicReconfigure:
     while not rospy.is_shutdown():
       self.dynamic_reconfigure_params()
       rate.sleep()
+      rospy.loginfo(self.rate)
     rospy.spin()
 
 

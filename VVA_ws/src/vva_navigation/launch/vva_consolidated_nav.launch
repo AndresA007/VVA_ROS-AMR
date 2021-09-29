@@ -200,7 +200,7 @@ Consolidated launch file that includes nodes related to Odom Correction, Move Ba
   <node pkg="vva_navigation" type="vva_dynamic_reconfigure_params.py" name="vva_dynamic_reconfigure_params" output="screen" >
    
    <!-- Out -->
-   <param name="rate"                   value="$(arg rate)"/>  <!-- Execution rate of the node (Hz) -->
+   <param name="rate"                   value="0.2"/>  <!-- Execution rate of the node (Hz) -->
   
   
   </node> 
